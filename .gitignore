@@ -1,0 +1,71 @@
+# 二进制文件
+#*.exe
+#*.exe~
+*.dll
+*.so
+*.dylib
+bossfi-blockchain-backend
+bossfi-blockchain-backend_unix
+
+# 测试二进制文件
+*.test
+
+# 输出的二进制文件（从Go 1.10开始）
+*.out
+
+# Go workspace file
+go.work
+
+# 依赖模块
+vendor/
+
+# IDE文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 日志文件
+logs/
+*.log
+
+# 临时文件
+#tmp/
+#temp/
+
+# 配置文件（可能包含敏感信息）
+#configs/config.local.yaml
+#configs/config.prod.yaml
+#.env
+#.env.local
+
+# 数据库文件
+#*.db
+#*.sqlite
+#*.sqlite3
+
+# 操作系统生成的文件
+#.DS_Store
+#.DS_Store?
+#._*
+#.Spotlight-V100
+#.Trashes
+#ehthumbs.db
+#Thumbs.db
+
+# 编译错误日志
+#build-errors.log
+
+# SSL证书
+#ssl/
+#*.pem
+#*.key
+#*.crt
+
+# Docker相关
+#docker-compose.override.yml
+
+# Swagger生成的文档
+#docs/docs.go
+#docs/swagger.json
+#docs/swagger.yaml 

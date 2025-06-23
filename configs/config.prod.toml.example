@@ -1,0 +1,66 @@
+# 生产环境配置模板
+# 服务器配置
+[server]
+port = 8080
+mode = "release"  # 生产模式
+read_timeout = "30s"
+write_timeout = "30s"
+
+# 数据库配置
+[database]
+driver = "mysql"
+host = "mysql"  # Docker服务名
+port = 3306
+database = "bossfi"
+username = "${DB_USERNAME}"  # 使用环境变量
+password = "${DB_PASSWORD}"  # 使用环境变量
+charset = "utf8mb4"
+parse_time = true
+loc = "Local"
+max_idle_conns = 10
+max_open_conns = 100
+conn_max_lifetime = "3600s"
+
+# Redis配置
+[redis]
+host = "redis"  # Docker服务名
+port = 6379
+password = "${REDIS_PASSWORD}"  # 使用环境变量
+db = 0
+pool_size = 10
+min_idle_conns = 2
+
+# JWT配置
+[jwt]
+secret = "${JWT_SECRET}"  # 使用环境变量，必须是强密钥
+expire_time = "24h"
+
+# 日志配置
+[logger]
+level = "info"  # 生产环境使用info级别
+filename = "./logs/app.log"
+max_size = 100
+max_age = 30
+max_backups = 10
+compress = true
+
+# 区块链配置
+[blockchain]
+network = "mainnet"  # 主网
+confirmation_blocks = 6
+gas_price = 20000000000  # 20 gwei
+gas_limit = 21000
+
+# 安全配置
+[security]
+rate_limit = 1000  # 生产环境更高的限制
+cors_origins = [
+    "https://your-frontend-domain.com",
+    "https://www.your-frontend-domain.com",
+    "https://admin.your-frontend-domain.com"
+]
+trusted_proxies = [
+    "10.0.0.0/8",
+    "172.16.0.0/12",
+    "192.168.0.0/16"
+] 
