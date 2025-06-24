@@ -12,34 +12,62 @@
 参考：https://go.dev/doc/effective_go#file_names
 
 ## 目录结构说明
+```text
+目录结构说明
 
-### src/
-- **app/**: 应用核心代码
-    - **model/**: 数据模型定义
-    - **router/**: 路由定义
-    - **service/**: 业务逻辑实现
-    - **controller/**: 控制器层
-- **core/**: 核心组件
-    - **db/**: 数据库相关操作
-        - `init.go`: 数据库初始化
-        - `pgsql.go`: PostgreSQL 数据库操作
-        - `redis.go`: Redis 操作
-    - **gin/**: Gin 框架相关
-        - **router/**: 路由封装
-        - **middleware/**: 中间件
-            - `recory.go`: 恢复中间件
-            - `http_log.go`: HTTP 日志中间件
-            - `language.go`: 语言中间件
-    - **log/**: 日志处理
-    - **app.go**: 应用启动入口
-    - **config/**: 配置管理
-    - **result/**: 统一响应格式
-- **common/**: 公共组件
-    - `context.go`: 上下文相关工具
+├── sql/                      # SQL脚本目录
+│   └── bossfi.sql
+├── src/                      # 源代码目录
+│   ├── app/                  # 应用程序目录
+│   │   ├── model/            # 数据模型目录
+│   │   │   └── demo.go
+│   │   ├── router/           # 路由目录
+│   │   │   └── router_v1.go
+│   │   ├── service/          # 服务层目录
+│   │   │   └── demo.go
+│   │   └── controller/       # 控制器目录
+│   │       ├── evm.go
+│   │       └── demo.go
+│   ├── core/                 # 核心功能目录
+│   │   ├── db/               # 数据库相关目录
+│   │   │   ├── init.go
+│   │   │   ├── pgsql.go
+│   │   │   └── redis.go
+│   │   ├── ctx/              # 上下文相关目录
+│   │   │   └── context.go
+│   │   ├── gin/              # Gin相关目录
+│   │   │   ├── router/       # 路由相关目录
+│   │   │   │   └── router.go
+│   │   │   └── middleware/   # 中间件目录
+│   │   │       ├── recover.go  # 异常处理中间件
+│   │   │       ├── http_log.go # HTTP日志中间件
+│   │   │       └── language.go # 多语言处理中间件
+│   │   ├── log/              # 日志相关目录
+│   │   │   └── log.go
+│   │   ├── app.go            # 应用程序入口相关文件
+│   │   ├── config/           # 配置相关目录
+│   │   │   └── config.go
+│   │   ├── result/           # 结果处理相关目录
+│   │   │   └── result.go
+│   │   └── chainclient/      # 区块链客户端相关目录
+│   │       ├── evm/          # EVM相关目录
+│   │       │   └── evm.go
+│   │       ├── domain/       # 领域模型相关目录
+│   │       │   └── block.go
+│   │       └── service.go    # 服务相关文件
+│   ├── common/               # 公共代码目录
+│   │   ├── chain/            # 区块链相关公共代码目录
+│   │   │   └── constants.go
+│   │   └── utils.go          # 工具函数文件
+│   ├── main.go               # 主程序入口文件
+├── config/                   # 配置文件目录
+│   ├── config.toml           # 配置文件
+│   └── config.toml.example   # 配置文件示例
+├── go.mod                    # Go模块文件
+├── go.sum                    # Go依赖校验文件
+└── README.md                 # 项目说明文件
 
-### config/
-- `config.toml`: 主配置文件
-- `config.toml.example`: 配置示例文件
+```
 
 ### go.mod & go.sum
 - Go 模块依赖管理文件
@@ -68,11 +96,20 @@
 4. 运行 `go run main.go` 启动服务
 
 ## API 文档(后续增加swagger)
-GET /api/v1/test
+
+示例 根据参数查询 8615565 高度的区块信息
+
+- GET http://localhost:8000/api/v1/evm/get_block_by_num/8615565
+
 GET /api/v1/demo/:id
-POST /api/v1/create
-PUT /api/v1/update
-DELETE /api/v1/delete/:id
-GET /api/v1/list
-GET /api/v1/page?page=1&page_size=10
+
+POST /api/v1/demo/create
+
+PUT /api/v1/demo/update
+
+DELETE /api/v1/demo/delete/:id
+
+GET /api/v1/demo/list
+
+GET /api/v1/demo/page?page=1&page_size=10
 

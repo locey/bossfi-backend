@@ -1,23 +1,30 @@
 package config
 
 import (
-	"flag"
-	"github.com/spf13/viper"
-	"strings"
+	"github.com/BurntSushi/toml"
+	"path/filepath"
+	"runtime"
 )
 
 var Conf *Config
 
 type Config struct {
-	App   AppConfig
-	Pgsql PgsqlConfig
-	Redis RedisConfig
+	App     AppConfig
+	Monitor MonitorConfig
+	Pgsql   PgsqlConfig
+	Redis   RedisConfig
+	Chains  []ChainConfig
 }
 
 type AppConfig struct {
 	Name    string `toml:"name" json:"name"`
 	Port    string `toml:"port" json:"port"`
 	Version string `toml:"version" json:"version"`
+}
+
+type MonitorConfig struct {
+	PprofEnable bool `toml:"pprof_enable" json:"pprofEnable"`
+	PprofPort   int  `toml:"pprof_port" json:"pprofPort"`
 }
 
 type PgsqlConfig struct {
@@ -38,41 +45,45 @@ type RedisConfig struct {
 	IdleTimeout int    `toml:"idle_timeout" json:"idleTimeout"`
 }
 
+type ChainConfig struct {
+	Name     string `toml:"name" json:"name"`
+	ChainId  int    `toml:"chain_id" json:"chainId"`
+	Endpoint string `toml:"endpoint" json:"endpoint"`
+}
+
 // InitConfig 初始化配置
-func InitConfig(configPath string) *Config {
-	conf := flag.String("conf", configPath, "conf file path")
-	flag.Parse()
-	c, err := UnmarshalConfig(*conf)
+func InitConfig(configFile string) *Config {
+	tomlFile, err := filepath.Abs(getConfigAbPath() + "/" + configFile)
 	if err != nil {
-		panic(err)
+		panic("read toml file err: " + err.Error())
 	}
-	Conf = c
-	return c
+
+	conf := Config{}
+	if _, err := toml.DecodeFile(tomlFile, &conf); err != nil {
+		panic("read toml file err: " + err.Error())
+	}
+
+	Conf = &conf
+	return &conf
 }
 
-// UnmarshalConfig 解析配置文件
-func UnmarshalConfig(configFilePath string) (*Config, error) {
-	viper.SetConfigFile(configFilePath)
-	viper.SetConfigType("toml")
-	viper.AutomaticEnv()
-	viper.SetEnvPrefix("BOSSFI")
-	replacer := strings.NewReplacer(".", "_")
-	viper.SetEnvKeyReplacer(replacer)
-
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
-	}
-	config, err := DefaultConfig()
-	if err != nil {
-		return nil, err
+func getCurrentAbPath() string {
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		return ""
 	}
 
-	if err := viper.Unmarshal(config); err != nil {
-		return nil, err
-	}
-	return config, nil
+	// 获取当前文件所在目录
+	dir := filepath.Dir(filename)
+
+	// 获取上两级目录
+	abPath := filepath.Join(dir, "..", "..", "..")
+
+	// Clean 会清理多余的 ../ 和 . 等符号，确保路径合法
+	clean := filepath.Clean(abPath)
+	return clean
 }
 
-func DefaultConfig() (*Config, error) {
-	return &Config{}, nil
+func getConfigAbPath() string {
+	return getCurrentAbPath() + "/config"
 }

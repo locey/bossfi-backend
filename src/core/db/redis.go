@@ -17,10 +17,10 @@ func InitRedis() *redis.Pool {
 	redisConf := config.Conf.Redis
 	// 建立连接池
 	RedisConn = &redis.Pool{
-		MaxIdle:     10,   // 最大的空闲连接数，表示即使没有redis连接时依然可以保持N个空闲的连接，而不被清除，随时处于待命状态。
-		MaxActive:   0,    // 最大的激活连接数，表示同时最多有N个连接   0 表示无穷大
-		Wait:        true, // 如果连接数不足则阻塞等待
-		IdleTimeout: 180 * time.Second,
+		MaxIdle:     redisConf.MaxIdle,   // 最大的空闲连接数，表示即使没有redis连接时依然可以保持N个空闲的连接，而不被清除，随时处于待命状态。
+		MaxActive:   redisConf.MaxActive, // 最大的激活连接数，表示同时最多有N个连接   0 表示无穷大
+		Wait:        true,                // 如果连接数不足则阻塞等待
+		IdleTimeout: time.Duration(redisConf.IdleTimeout) * time.Second,
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", fmt.Sprintf("%s:%s", redisConf.Host, redisConf.Port))
 			if err != nil {

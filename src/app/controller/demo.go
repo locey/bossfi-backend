@@ -10,12 +10,6 @@ import (
 
 var demoService = service.NewDemoService()
 
-// Test curl "http://localhost:8001/api/v1/test"
-func Test(c *gin.Context) {
-	result.OK(c, "hello")
-	return
-}
-
 // CreateDemo 创建数据
 func CreateDemo(c *gin.Context) {
 	var req model.BossfiDemo

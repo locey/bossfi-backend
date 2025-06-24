@@ -1,13 +1,13 @@
 package log
 
 import (
+	"bossfi-backend/src/common"
 	"bossfi-backend/src/core/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"time"
 )
@@ -19,11 +19,11 @@ func InitLog() *zap.Logger {
 	//zap 不支持文件归档，如果要支持文件按大小或者时间归档，需要使用lumberjack，lumberjack也是zap官方推荐的。
 	// https://github.com/uber-go/zap/blob/master/FAQ.md
 	hook := lumberjack.Logger{
-		Filename:   getCurrentAbPath() + "/logs/" + config.Conf.App.Name + ".log", // 日志文件路径
-		MaxSize:    50,                                                            // 每个日志文件保存的最大尺寸 单位：M
-		MaxBackups: 20,                                                            // 日志文件最多保存多少个备份
-		MaxAge:     7,                                                             // 文件最多保存多少天
-		Compress:   true,                                                          // 是否压缩
+		Filename:   common.GetCurrentAbPath() + "/logs/" + config.Conf.App.Name + ".log", // 日志文件路径
+		MaxSize:    50,                                                                   // 每个日志文件保存的最大尺寸 单位：M
+		MaxBackups: 20,                                                                   // 日志文件最多保存多少个备份
+		MaxAge:     7,                                                                    // 文件最多保存多少天
+		Compress:   true,                                                                 // 是否压缩
 	}
 
 	encoderConfig := zapcore.EncoderConfig{
@@ -70,29 +70,11 @@ func customTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 
 // 精简line路径
 func shortCallerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
-	root := getCurrentAbPath() // 获取项目根目录
+	root := common.GetCurrentAbPath() // 获取项目根目录
 	path := caller.File
 	if rel, err := filepath.Rel(root, path); err == nil {
 		enc.AppendString(rel + ":" + strconv.Itoa(caller.Line))
 	} else {
 		enc.AppendString(path + ":" + strconv.Itoa(caller.Line))
 	}
-}
-
-// 获取当前项目绝对路径（go run）
-func getCurrentAbPath() string {
-	_, filename, _, ok := runtime.Caller(0)
-	if !ok {
-		return ""
-	}
-
-	// 获取当前文件所在目录
-	dir := filepath.Dir(filename)
-
-	// 获取上两级目录
-	abPath := filepath.Join(dir, "..", "..", "..")
-
-	// Clean 会清理多余的 ../ 和 . 等符号，确保路径合法
-	clean := filepath.Clean(abPath)
-	return clean
 }

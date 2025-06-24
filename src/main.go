@@ -1,14 +1,12 @@
 package main
 
-import (
-	"bossfi-backend/src/core"
-)
+import "bossfi-backend/src/core"
 
 const (
-	// ConfigPath 配置文件路径
-	ConfigPath = "./config/config.toml"
+	// ConfigFile 配置文件路径
+	ConfigFile = "config.toml"
 )
 
 func main() {
-	core.Start(ConfigPath)
+	core.Start(ConfigFile)
 }

@@ -23,15 +23,19 @@ const (
 
 	// SystemError 系统级别错误状态码 2开头
 	SystemError = 200000
-	// DBError 系统数据库层面报错 2001xx
+	// DBError 数据库层面报错 2001xx
 	DBError        = 200100
 	DBCreateFailed = 200101
 	DBUpdateFailed = 200102
 	DBDeleteFailed = 200103
 	DBQueryFailed  = 200104
 	DBNotExist     = 200105
-	// RedisError 系统数据库层面报错 2002xx
+	// RedisError 数据库层面报错 2002xx
 	RedisError = 200200
+	// MQError 消息队列报错 2003xx
+	MQError = 200300
+	// EthereumError 以太坊客户端报错 2004xx
+	EthereumError = 200400
 )
 
 // ErrMsgMap 业务错误
@@ -45,8 +49,8 @@ var ErrMsgMap = map[int]map[int]string{
 		LANG_EN: "Invalid parameters",
 	},
 	SystemError: {
-		LANG_ZH: "服务器繁忙，请稍后重试",
-		LANG_EN: "Network error, please try again later",
+		LANG_ZH: "服务器内部错误，请稍后重试",
+		LANG_EN: "Internal server error, please try again later",
 	},
 	DBError: {
 		LANG_ZH: "数据库错误",
@@ -71,6 +75,10 @@ var ErrMsgMap = map[int]map[int]string{
 	DBNotExist: {
 		LANG_ZH: "数据不存在",
 		LANG_EN: "Not exist",
+	},
+	EthereumError: {
+		LANG_ZH: "ETH客户端错误",
+		LANG_EN: "ETH client error",
 	},
 }
 

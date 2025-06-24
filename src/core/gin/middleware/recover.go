@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"bossfi-backend/src/core/log"
+	"bossfi-backend/src/core/result"
 	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -24,7 +25,7 @@ func RecoverPanicMiddleware() gin.HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 				log.Logger.Error(fmt.Sprintf("[Recovery] panic recovered, request:%s%v [## stack:]:\n%s", dumpRequest(ctx.Request), err, dumpStack(3)))
-				ctx.JSON(500, gin.H{"message": "服务器内部错误"})
+				result.Error(ctx, result.SystemError)
 			}
 		}()
 
