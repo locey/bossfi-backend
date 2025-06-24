@@ -10,7 +10,7 @@ import (
 
 // Transaction 交易实体
 type Transaction struct {
-	ID            string           `gorm:"type:varchar(36);primaryKey" json:"id"`
+	ID            string           `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
 	Hash          string           `gorm:"type:varchar(100);uniqueIndex" json:"hash"`
 	FromAddress   string           `gorm:"type:varchar(100);not null;index" json:"from_address"`
 	ToAddress     string           `gorm:"type:varchar(100);not null;index" json:"to_address"`
@@ -18,7 +18,7 @@ type Transaction struct {
 	Fee           decimal.Decimal  `gorm:"type:decimal(36,18);default:0" json:"fee"`
 	Network       string           `gorm:"type:varchar(20);not null" json:"network"`
 	Type          Type             `gorm:"type:varchar(20);not null" json:"type"`
-	Status        Status           `gorm:"type:tinyint;default:1" json:"status"`
+	Status        Status           `gorm:"type:integer;default:1" json:"status"`
 	BlockNumber   *uint64          `gorm:"index" json:"block_number"`
 	BlockHash     string           `gorm:"type:varchar(100);index" json:"block_hash"`
 	Confirmations uint64           `gorm:"default:0" json:"confirmations"`
@@ -26,8 +26,8 @@ type Transaction struct {
 	GasPrice      *decimal.Decimal `gorm:"type:decimal(36,18)" json:"gas_price"`
 	Nonce         *uint64          `json:"nonce"`
 	Memo          string           `gorm:"type:text" json:"memo"`
-	CreatedAt     time.Time        `json:"created_at"`
-	UpdatedAt     time.Time        `json:"updated_at"`
+	CreatedAt     time.Time        `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt     time.Time        `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP" json:"updated_at"`
 	DeletedAt     gorm.DeletedAt   `gorm:"index" json:"-"`
 }
 

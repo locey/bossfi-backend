@@ -19,17 +19,17 @@ const (
 
 // Stake 质押实体
 type Stake struct {
-	ID               string          `gorm:"type:char(36);primaryKey" json:"id"`
-	UserID           string          `gorm:"type:char(36);not null;index" json:"user_id"`
+	ID               string          `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+	UserID           string          `gorm:"type:uuid;not null;index" json:"user_id"`
 	Amount           decimal.Decimal `gorm:"type:decimal(36,18);not null" json:"amount"`
 	RewardEarned     decimal.Decimal `gorm:"type:decimal(36,18);default:0" json:"reward_earned"`
-	Status           StakeStatus     `gorm:"type:enum('active','unstaking','completed');default:'active'" json:"status"`
-	StakedAt         time.Time       `gorm:"not null" json:"staked_at"`
-	UnstakeRequestAt *time.Time      `json:"unstake_request_at"`
-	UnstakedAt       *time.Time      `json:"unstaked_at"`
-	LastRewardAt     time.Time       `gorm:"not null" json:"last_reward_at"`
-	CreatedAt        time.Time       `json:"created_at"`
-	UpdatedAt        time.Time       `json:"updated_at"`
+	Status           StakeStatus     `gorm:"type:stake_status_enum;default:'active'" json:"status"`
+	StakedAt         time.Time       `gorm:"type:timestamptz;not null" json:"staked_at"`
+	UnstakeRequestAt *time.Time      `gorm:"type:timestamptz" json:"unstake_request_at"`
+	UnstakedAt       *time.Time      `gorm:"type:timestamptz" json:"unstaked_at"`
+	LastRewardAt     time.Time       `gorm:"type:timestamptz;not null" json:"last_reward_at"`
+	CreatedAt        time.Time       `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt        time.Time       `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP" json:"updated_at"`
 	DeletedAt        gorm.DeletedAt  `gorm:"index" json:"-"`
 }
 

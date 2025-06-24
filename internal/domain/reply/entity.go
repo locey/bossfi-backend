@@ -9,14 +9,14 @@ import (
 
 // PostReply 帖子回复实体
 type PostReply struct {
-	ID        string         `gorm:"type:char(36);primaryKey" json:"id"`
-	PostID    string         `gorm:"type:char(36);not null;index" json:"post_id"`
-	UserID    string         `gorm:"type:char(36);not null;index" json:"user_id"`
-	ParentID  *string        `gorm:"type:char(36);index" json:"parent_id"`
+	ID        string         `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+	PostID    string         `gorm:"type:uuid;not null;index" json:"post_id"`
+	UserID    string         `gorm:"type:uuid;not null;index" json:"user_id"`
+	ParentID  *string        `gorm:"type:uuid;index" json:"parent_id"`
 	Content   string         `gorm:"type:text;not null" json:"content"`
 	LikeCount int64          `gorm:"default:0" json:"like_count"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
+	CreatedAt time.Time      `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt time.Time      `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP" json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 

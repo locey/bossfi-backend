@@ -1,340 +1,379 @@
-# BossFi Blockchain Backend
+# BossFi Backend
 
-基于DDD（领域驱动设计）架构的区块链后端服务，使用Gin + GORM MySQL + Redis技术栈构建。
+基于区块链的去中心化求职平台后端服务
 
-## 📋 目录
+## 📋 项目简介
 
-- [功能特性](#功能特性)
-- [技术栈](#技术栈)
-- [项目结构](#项目结构)
-- [快速开始](#快速开始)
-- [API文档](#api文档)
-- [配置说明](#配置说明)
-- [部署指南](#部署指南)
-- [开发指南](#开发指南)
-- [贡献指南](#贡献指南)
+BossFi Backend 是一个使用 Go 语言开发的现代化后端服务，为去中心化求职平台提供 API 支持。项目采用清洁架构设计，支持钱包登录、帖子管理、质押奖励等核心功能。
 
-## 🚀 功能特性
+## 🚀 技术栈
 
-- ✅ **用户管理**：注册、登录、资料管理、权限控制
-- ✅ **钱包管理**：多链钱包创建、余额管理、状态控制
-- ✅ **交易管理**：交易记录、状态跟踪、确认机制
-- ✅ **安全机制**：JWT认证、密码加密、限流保护
-- ✅ **管理后台**：用户管理、钱包管理、系统监控
-- ✅ **多链支持**：Bitcoin、Ethereum、BSC、Polygon、TRON
-- ✅ **监控日志**：结构化日志、性能监控、错误追踪
-- ✅ **生产就绪**：Docker部署、优雅关闭、健康检查
+- **语言**: Go 1.21+
+- **框架**: Gin Web Framework
+- **数据库**: PostgreSQL
+- **ORM**: GORM
+- **认证**: JWT + 钱包签名
+- **日志**: Zap
+- **文档**: Swagger
+- **配置**: TOML
 
-## 🛠 技术栈
-
-### 后端技术
-- **框架**：Gin Web Framework
-- **数据库**：MySQL 8.0 + GORM ORM
-- **缓存**：Redis
-- **认证**：JWT (JSON Web Token)
-- **文档**：Swagger/OpenAPI
-- **日志**：Zap + Lumberjack
-- **配置**：Viper
-
-### 区块链集成
-- **Bitcoin**：btcd/btcutil
-- **Ethereum**：go-ethereum
-- **多链支持**：统一接口设计
-
-### 部署运维
-- **容器化**：Docker + Docker Compose
-- **反向代理**：Nginx
-- **监控**：结构化日志 + 健康检查
-
-## 📁 项目结构
+## 🏗️ 项目结构
 
 ```
-backend/
+bossfi-backend/
 ├── cmd/                    # 应用程序入口
-│   └── server/
-│       └── main.go        # 主服务器
-├── internal/              # 内部包（不对外暴露）
-│   ├── api/              # API层（控制器）
+│   └── server/            # 服务器启动文件
+├── internal/              # 内部应用代码
+│   ├── api/              # API 路由和处理器
+│   │   ├── v1/           # v1 版本 API handlers
 │   │   ├── routes.go     # 路由配置
-│   │   ├── response.go   # 统一响应
-│   │   ├── user_handler.go
-│   │   └── wallet_handler.go
-│   ├── service/          # 业务逻辑层
-│   │   ├── user_service.go
-│   │   └── wallet_service.go
+│   │   ├── response.go   # 响应处理
+│   │   └── v1.go         # v1 路由注册
+│   ├── domain/           # 业务实体
+│   │   ├── user/         # 用户实体
+│   │   ├── post/         # 帖子实体
+│   │   └── stake/        # 质押实体
 │   ├── repository/       # 数据访问层
-│   │   ├── user_repository.go
-│   │   ├── wallet_repository.go
-│   │   └── transaction_repository.go
-│   └── domain/           # 领域模型层
-│       ├── user/         # 用户领域
-│       ├── wallet/       # 钱包领域
-│       └── transaction/  # 交易领域
+│   └── service/          # 业务逻辑层
 ├── pkg/                  # 公共包
 │   ├── config/          # 配置管理
 │   ├── database/        # 数据库连接
-│   ├── redis/           # Redis连接
 │   ├── logger/          # 日志管理
-│   └── middleware/      # 中间件
+│   ├── middleware/      # 中间件
+│   └── mreturn/         # 统一响应格式
 ├── configs/             # 配置文件
-│   └── config.yaml
-├── migrations/          # 数据库迁移
-│   └── 001_init.sql
-├── docs/               # 文档目录
-├── logs/               # 日志目录
-├── go.mod              # Go模块文件
-├── go.sum              # 依赖锁定文件
-├── Dockerfile          # Docker构建文件
-├── docker-compose.yml  # Docker编排文件
-├── Makefile           # 构建脚本
-└── README.md          # 项目说明
+├── migrations/          # 数据库迁移文件
+└── scripts/             # 部署和工具脚本
 ```
 
-## 🚀 快速开始
+## 📦 安装和运行
 
 ### 环境要求
 
-- Go 1.21+
-- MySQL 8.0+
-- Redis 6.0+
+- Go 1.21 或更高版本
+- PostgreSQL 12 或更高版本
+- Git
 
-### 本地开发
+### 1. 克隆项目
 
-1. **克隆项目**
 ```bash
-git clone <repository-url>
-cd backend
+git clone https://github.com/your-username/bossfi-backend.git
+cd bossfi-backend
 ```
 
-2. **安装依赖**
+### 2. 安装依赖
+
 ```bash
-make deps
+go mod download
 ```
 
-3. **配置环境**
-```bash
-# 复制配置文件
-cp configs/config.yaml.example configs/config.yaml
+### 3. 配置数据库
 
-# 编辑配置文件，修改数据库和Redis连接信息
-vim configs/config.yaml
+#### 创建数据库和用户
+
+```sql
+-- 连接到 PostgreSQL
+psql -U postgres
+
+-- 创建数据库
+CREATE DATABASE bossfi;
+
+-- 创建用户
+CREATE USER bossfier WITH PASSWORD 'your_password';
+
+-- 授权
+GRANT ALL PRIVILEGES ON DATABASE bossfi TO bossfier;
+GRANT ALL ON SCHEMA public TO bossfier;
+GRANT CREATE ON SCHEMA public TO bossfier;
 ```
 
-4. **初始化数据库**
+#### 运行迁移
+
 ```bash
-# 创建数据库并执行迁移
-make migrate
+# 使用提供的脚本
+cd scripts
+./create_database.bat  # Windows
+# 或
+bash create_database.sh  # Linux/Mac
 ```
 
-5. **启动服务**
-```bash
-# 开发模式（热重载）
-make dev
+### 4. 配置文件
 
-# 或者直接运行
-make run
+复制并编辑配置文件：
+
+```bash
+cp configs/config.toml.example configs/config.toml
 ```
 
-6. **访问服务**
-- API服务：http://localhost:8080
-- API文档：http://localhost:8080/swagger/index.html
-- 健康检查：http://localhost:8080/health
+编辑 `configs/config.toml`：
 
-### Docker部署
+```toml
+[server]
+port = 8080
+mode = "debug"
+read_timeout = "60s"
+write_timeout = "60s"
 
-1. **使用Docker Compose**
+[database]
+driver = "postgres"
+host = "localhost"
+port = 5432
+database = "bossfi"
+username = "bossfier"
+password = "your_db_password"
+sslmode = "disable"
+timezone = "UTC"
+
+[jwt]
+secret = "your-super-secret-jwt-key-change-this-in-production"
+expire_time = "24h"
+
+[logger]
+level = "info"
+filename = "./logs/app.log"
+max_size = 100
+max_age = 30
+max_backups = 5
+compress = true
+```
+
+**⚠️ 重要安全提示：**
+- 请务必修改 JWT 密钥为你自己的强密钥
+- 生产环境中使用强密码
+- 不要将包含敏感信息的配置文件提交到版本控制
+
+### 5. 运行服务
+
+#### 开发模式
+
+```bash
+go run ./cmd/server
+```
+
+#### 编译运行
+
+```bash
+# 编译
+go build -o main ./cmd/server
+
+# 运行
+./main      # Linux/Mac
+main.exe    # Windows (如果在Windows上编译)
+```
+
+服务默认运行在 `http://localhost:8080`
+
+## 📚 API 文档
+
+### 接口概览
+
+#### 认证相关
+- `POST /api/v1/auth/nonce` - 生成登录随机数
+- `POST /api/v1/auth/login` - 钱包签名登录
+
+#### 用户管理
+- `GET /api/v1/users/profile` - 获取用户资料
+- `PUT /api/v1/users/profile` - 更新用户资料
+- `GET /api/v1/users/stats` - 获取用户统计
+- `GET /api/v1/users/search` - 搜索用户
+
+#### 帖子管理
+- `GET /api/v1/posts` - 获取帖子列表
+- `POST /api/v1/posts` - 创建帖子
+- `GET /api/v1/posts/{id}` - 获取帖子详情
+- `PUT /api/v1/posts/{id}` - 更新帖子
+- `DELETE /api/v1/posts/{id}` - 删除帖子
+- `POST /api/v1/posts/{id}/like` - 点赞帖子
+
+#### 质押功能
+- `POST /api/v1/stakes` - 创建质押
+- `GET /api/v1/stakes/{id}` - 获取质押详情
+- `POST /api/v1/stakes/{id}/unstake` - 请求解质押
+- `POST /api/v1/stakes/rewards/claim` - 领取奖励
+
+### Swagger 文档
+
+启动服务后访问：`http://localhost:8080/swagger/index.html`
+
+### 认证方式
+
+#### 1. 获取 Nonce
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/nonce \
+  -H "Content-Type: application/json" \
+  -d '{"wallet_address": "0x..."}'
+```
+
+#### 2. 钱包签名登录
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "wallet_address": "0x...",
+    "signature": "0x...",
+    "message": "nonce_message"
+  }'
+```
+
+#### 3. 使用 JWT Token
+
+```bash
+curl -X GET http://localhost:8080/api/v1/users/profile \
+  -H "Authorization: Bearer your_jwt_token"
+```
+
+## 🔧 开发指南
+
+### 代码规范
+
+- 使用 `gofmt` 格式化代码
+- 遵循 Go 官方代码规范
+- 使用有意义的变量和函数名
+- 添加必要的注释
+
+### 项目特性
+
+#### 1. 清洁架构
+- **Domain**: 业务实体和规则
+- **Repository**: 数据访问抽象
+- **Service**: 业务逻辑实现
+- **Handler**: HTTP 请求处理
+
+#### 2. 中间件支持
+- **认证中间件**: JWT token 验证
+- **日志中间件**: 请求日志记录
+- **CORS中间件**: 跨域支持
+- **限流中间件**: API 访问限制
+- **追踪中间件**: 请求链路追踪
+
+#### 3. 统一响应格式
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {}
+}
+```
+
+#### 4. 错误处理
+- 统一的错误响应格式
+- 详细的错误日志记录
+- 用户友好的错误信息
+
+### 添加新功能
+
+1. **添加实体**: 在 `internal/domain/` 下创建新的实体
+2. **添加仓库**: 在 `internal/repository/` 下实现数据访问
+3. **添加服务**: 在 `internal/service/` 下实现业务逻辑
+4. **添加处理器**: 在 `internal/api/v1/` 下添加 HTTP 处理器
+5. **注册路由**: 在 `internal/api/v1.go` 中注册新路由
+
+## 🐳 Docker 部署
+
+### 使用 Docker Compose
+
 ```bash
 # 启动所有服务
 docker-compose up -d
 
-# 查看服务状态
-docker-compose ps
-
 # 查看日志
-docker-compose logs -f app
+docker-compose logs -f
+
+# 停止服务
+docker-compose down
 ```
 
-2. **单独构建**
+### 单独构建
+
 ```bash
 # 构建镜像
-make docker-build
+docker build -t bossfi-backend .
 
 # 运行容器
-make docker-run
+docker run -p 8080:8080 bossfi-backend
 ```
 
-## 📖 API文档
+## 🧪 测试
 
-### 认证接口
-- `POST /api/v1/auth/register` - 用户注册
-- `POST /api/v1/auth/login` - 用户登录
-
-### 用户接口
-- `GET /api/v1/user/profile` - 获取用户资料
-- `PUT /api/v1/user/profile` - 更新用户资料
-- `PUT /api/v1/user/password` - 修改密码
-
-### 钱包接口
-- `POST /api/v1/wallets` - 创建钱包
-- `GET /api/v1/wallets/my` - 获取我的钱包
-- `GET /api/v1/wallets/{id}` - 获取钱包详情
-- `GET /api/v1/wallets/address/{address}` - 根据地址获取钱包
-
-### 管理员接口
-- `GET /api/v1/admin/users` - 用户列表
-- `DELETE /api/v1/admin/users/{id}` - 删除用户
-- `GET /api/v1/admin/wallets` - 钱包列表
-- `PUT /api/v1/admin/wallets/{id}/freeze` - 冻结钱包
-
-完整API文档请访问：http://localhost:8080/swagger/index.html
-
-## ⚙️ 配置说明
-
-主要配置项：
-
-```yaml
-# 服务器配置
-server:
-  port: 8080              # 服务端口
-  mode: debug             # 运行模式：debug/release/test
-
-# 数据库配置
-database:
-  host: localhost         # 数据库主机
-  port: 3306             # 数据库端口
-  database: bossfi_blockchain
-  username: root
-  password: root
-
-# Redis配置
-redis:
-  host: localhost
-  port: 6379
-  password: ""
-  db: 0
-
-# JWT配置
-jwt:
-  secret: "your-secret-key"
-  expire_time: 24h
-
-# 安全配置
-security:
-  rate_limit: 100         # 每分钟请求限制
-  cors_origins: ["*"]     # CORS允许的源
-```
-
-## 🚢 部署指南
-
-### 生产环境部署
-
-1. **环境准备**
-```bash
-# 服务器环境
-- CentOS 7+ / Ubuntu 18+
-- Docker 20+
-- Docker Compose 1.25+
-```
-
-2. **配置文件**
-```bash
-# 生产环境配置
-server:
-  mode: release
-  port: 8080
-
-database:
-  host: mysql
-  port: 3306
-  # 使用环境变量或安全的配置管理
-
-security:
-  cors_origins: ["https://yourdomain.com"]
-  rate_limit: 1000
-```
-
-3. **SSL配置**
-```bash
-# 配置SSL证书
-mkdir ssl
-# 放置SSL证书文件
-```
-
-4. **启动服务**
-```bash
-# 生产环境启动
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-### 监控与维护
-
-- **日志监控**：logs/app.log
-- **性能监控**：/health端点
-- **数据备份**：定期备份MySQL数据
-- **安全更新**：定期更新依赖包
-
-## 👨‍💻 开发指南
-
-### 开发规范
-
-1. **代码结构**
-   - 遵循DDD架构模式
-   - 保持层次清晰分离
-   - 使用依赖注入
-
-2. **命名规范**
-   - 包名：小写，简短
-   - 接口：以er结尾
-   - 常量：大写，下划线分隔
-
-3. **错误处理**
-   - 使用自定义错误类型
-   - 统一错误响应格式
-   - 记录详细错误日志
-
-### 测试
+### 运行测试
 
 ```bash
-# 运行测试
-make test
+# 运行所有测试
+go test ./...
 
-# 运行基准测试
-go test -bench=. ./...
+# 运行特定包的测试
+go test ./internal/service/...
 
-# 生成测试覆盖率
+# 运行测试并显示覆盖率
 go test -cover ./...
 ```
 
-### 新增功能
+### 健康检查
 
-1. **添加新的领域模型**
-   - 在`internal/domain`下创建新包
-   - 定义实体、值对象、聚合根
-   - 定义领域错误
+```bash
+curl http://localhost:8080/health
+```
 
-2. **添加新的API**
-   - 在`internal/api`下添加处理器
-   - 在`routes.go`中注册路由
-   - 添加Swagger注释
+预期响应：
+```json
+{
+  "status": "ok",
+  "service": "bossfi-backend",
+  "version": "1.0.0"
+}
+```
+
+## 📝 数据库迁移
+
+### 从 MySQL 迁移到 PostgreSQL
+
+项目已完成从 MySQL 到 PostgreSQL 的迁移，详细迁移步骤：
+
+1. 更新依赖包
+2. 修改配置文件
+3. 调整数据模型
+4. 运行迁移脚本
+
+具体迁移文档请参考项目中的迁移指南。
+
+## 🔍 日志和监控
+
+### 日志级别
+- `debug`: 调试信息
+- `info`: 一般信息
+- `warn`: 警告信息
+- `error`: 错误信息
+
+### 日志格式
+支持 JSON 和文本两种格式，推荐生产环境使用 JSON 格式。
+
+### 请求追踪
+每个请求都会生成唯一的 TraceID，方便问题排查。
 
 ## 🤝 贡献指南
 
-1. Fork项目
+1. Fork 项目
 2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开Pull Request
+5. 创建 Pull Request
 
 ## 📄 许可证
 
-本项目采用MIT许可证。详见[LICENSE](LICENSE)文件。
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
 
 ## 📞 联系方式
 
-- 项目维护者：[Your Name]
-- 邮箱：your.email@example.com
-- 项目地址：[GitHub Repository]
+- 项目链接: [https://github.com/locey/bossfi-backend](https://github.com/locey/bossfi-backend)
+- 问题反馈: [GitHub Issues](https://github.com/locey/bossfi-backend/issues)
+
+## 🙏 致谢
+
+感谢所有为这个项目做出贡献的开发者！
 
 ---
 
-⭐ 如果这个项目对你有帮助，请给个Star！ 
+**BossFi Backend** - 让去中心化求职变得简单 🚀 

@@ -10,7 +10,7 @@ import (
 
 // User 用户实体
 type User struct {
-	ID                string          `gorm:"type:char(36);primaryKey" json:"id"`
+	ID                string          `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
 	WalletAddress     string          `gorm:"type:varchar(42);uniqueIndex;not null" json:"wallet_address"`
 	Username          *string         `gorm:"type:varchar(50);uniqueIndex" json:"username"`
 	Email             *string         `gorm:"type:varchar(255);uniqueIndex" json:"email"`
@@ -19,10 +19,10 @@ type User struct {
 	BossBalance       decimal.Decimal `gorm:"type:decimal(36,18);default:0" json:"boss_balance"`
 	StakedAmount      decimal.Decimal `gorm:"type:decimal(36,18);default:0" json:"staked_amount"`
 	RewardBalance     decimal.Decimal `gorm:"type:decimal(36,18);default:0" json:"reward_balance"`
-	IsProfileComplete bool            `gorm:"type:tinyint(1);default:0" json:"is_profile_complete"`
-	LastLoginAt       *time.Time      `json:"last_login_at"`
-	CreatedAt         time.Time       `json:"created_at"`
-	UpdatedAt         time.Time       `json:"updated_at"`
+	IsProfileComplete bool            `gorm:"type:boolean;default:false" json:"is_profile_complete"`
+	LastLoginAt       *time.Time      `gorm:"type:timestamptz" json:"last_login_at"`
+	CreatedAt         time.Time       `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt         time.Time       `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP" json:"updated_at"`
 	DeletedAt         gorm.DeletedAt  `gorm:"index" json:"-"`
 }
 

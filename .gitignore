@@ -1,11 +1,13 @@
 # 二进制文件
-#*.exe
-#*.exe~
+*.exe
+*.exe~
 *.dll
 *.so
 *.dylib
 bossfi-blockchain-backend
 bossfi-blockchain-backend_unix
+main
+main.exe
 
 # 测试二进制文件
 *.test
@@ -30,42 +32,56 @@ logs/
 *.log
 
 # 临时文件
-#tmp/
-#temp/
+tmp/
+temp/
 
 # 配置文件（可能包含敏感信息）
-#configs/config.local.yaml
-#configs/config.prod.yaml
-#.env
-#.env.local
+configs/config.toml
+configs/config.local.toml
+configs/config.prod.toml
+.env
+.env.local
+.env.production
 
 # 数据库文件
-#*.db
-#*.sqlite
-#*.sqlite3
+*.db
+*.sqlite
+*.sqlite3
 
 # 操作系统生成的文件
-#.DS_Store
-#.DS_Store?
-#._*
-#.Spotlight-V100
-#.Trashes
-#ehthumbs.db
-#Thumbs.db
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # 编译错误日志
-#build-errors.log
+build-errors.log
 
 # SSL证书
-#ssl/
-#*.pem
-#*.key
-#*.crt
+ssl/
+*.pem
+*.key
+*.crt
 
 # Docker相关
-#docker-compose.override.yml
+docker-compose.override.yml
 
 # Swagger生成的文档
-#docs/docs.go
-#docs/swagger.json
-#docs/swagger.yaml 
+docs/docs.go
+docs/swagger.json
+docs/swagger.yaml
+
+# 上传文件
+uploads/
+static/uploads/
+
+# 备份文件
+*.bak
+*.backup
+
+# 缓存文件
+.cache/
+cache/ 

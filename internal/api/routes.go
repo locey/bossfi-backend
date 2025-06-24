@@ -23,9 +23,10 @@ func SetupRoutes(
 	stakeService service.StakeService,
 ) {
 	// 全局中间件
+	r.Use(middleware.TraceMiddleware())
 	r.Use(middleware.Logger(logger))
 	r.Use(middleware.Recovery(logger))
-	r.Use(middleware.CORS(cfg))
+	r.Use(middleware.CORSMiddleware())
 	r.Use(middleware.RateLimit(cfg))
 
 	// 健康检查

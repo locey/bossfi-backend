@@ -10,6 +10,7 @@ import (
 
 	"bossfi-blockchain-backend/internal/service"
 	"bossfi-blockchain-backend/pkg/logger"
+	"bossfi-blockchain-backend/pkg/mreturn"
 )
 
 // UserHandler 用户处理
@@ -48,72 +49,41 @@ type LoginResponse struct {
 	User  interface{} `json:"user"`
 }
 
-// 响应辅助函数
-func successResponse(c *gin.Context, data interface{}) {
-	c.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "success",
-		"data":    data,
-	})
-}
-
-func errorResponse(c *gin.Context, status int, message string, err error) {
-	response := gin.H{
-		"code":    status,
-		"message": message,
-	}
-	if err != nil {
-		response["error"] = err.Error()
-	}
-	c.JSON(status, response)
-}
-
 // GenerateNonce 生成登录nonce
 // @Summary 生成登录nonce
-// @Description 为钱包地址生成登录nonce
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param request body NonceRequest true "nonce请求"
-// @Success 200 {object} NonceResponse
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
 // @Router /v1/auth/nonce [post]
 func (h *UserHandler) GenerateNonce(c *gin.Context) {
 	var req NonceRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("Invalid nonce request", zap.Error(err))
-		errorResponse(c, http.StatusBadRequest, "Invalid request parameters", err)
+		mreturn.BadRequest(c, "Invalid request parameters")
 		return
 	}
 
 	nonce, err := h.userService.GenerateNonce(c.Request.Context(), req.WalletAddress)
 	if err != nil {
 		h.logger.Error("Failed to generate nonce", zap.Error(err), zap.String("wallet_address", req.WalletAddress))
-		errorResponse(c, http.StatusInternalServerError, "Failed to generate nonce", err)
+		mreturn.InternalServerError(c, "Failed to generate nonce")
 		return
 	}
 
-	successResponse(c, NonceResponse{Message: nonce})
+	mreturn.Success(c, NonceResponse{Message: nonce})
 }
 
 // Login 用户登录
 // @Summary 用户登录
-// @Description 使用钱包签名进行用户登录
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param request body LoginRequest true "登录请求"
-// @Success 200 {object} LoginResponse
-// @Failure 400 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
 // @Router /v1/auth/login [post]
 func (h *UserHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("Invalid login request", zap.Error(err))
-		errorResponse(c, http.StatusBadRequest, "Invalid request parameters", err)
+		mreturn.BadRequest(c, "Invalid request parameters")
 		return
 	}
 
@@ -123,29 +93,24 @@ func (h *UserHandler) Login(c *gin.Context) {
 		Message:       req.Message,
 	}
 
-	response, err := h.userService.Login(c.Request.Context(), serviceReq)
+	loginResponse, err := h.userService.Login(c.Request.Context(), serviceReq)
 	if err != nil {
 		h.logger.Error("Login failed", zap.Error(err), zap.String("wallet_address", req.WalletAddress))
-		errorResponse(c, http.StatusUnauthorized, "Login failed", err)
+		mreturn.Unauthorized(c, "Login failed")
 		return
 	}
 
-	successResponse(c, LoginResponse{
-		Token: response.Token,
-		User:  response.User,
+	mreturn.Success(c, LoginResponse{
+		Token: loginResponse.Token,
+		User:  loginResponse.User,
 	})
 }
 
 // GetProfile 获取用户资料
 // @Summary 获取用户资料
-// @Description 获取当前用户的详细资料信息
 // @Tags 用户
 // @Security BearerAuth
 // @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
 // @Router /v1/users/profile [get]
 func (h *UserHandler) GetProfile(c *gin.Context) {
 	userID := getUserID(c)
@@ -153,26 +118,19 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 	user, err := h.userService.GetProfile(c.Request.Context(), userID)
 	if err != nil {
 		h.logger.Error("Failed to get user profile", zap.Error(err), zap.String("user_id", userID))
-		errorResponse(c, http.StatusNotFound, "User not found", err)
+		mreturn.NotFound(c, "User not found")
 		return
 	}
 
-	successResponse(c, user)
+	mreturn.Success(c, user)
 }
 
 // UpdateProfile 更新用户资料
 // @Summary 更新用户资料
-// @Description 更新当前用户的资料信息
 // @Tags 用户
 // @Security BearerAuth
 // @Accept json
 // @Produce json
-// @Param request body service.UpdateProfileRequest true "更新资料请求"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
-// @Failure 409 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
 // @Router /v1/users/profile [put]
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	userID := getUserID(c)
@@ -180,29 +138,25 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	var req service.UpdateProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("Invalid update profile request", zap.Error(err), zap.String("user_id", userID))
-		errorResponse(c, http.StatusBadRequest, "Invalid request parameters", err)
+		mreturn.BadRequest(c, "Invalid request parameters")
 		return
 	}
 
 	user, err := h.userService.UpdateProfile(c.Request.Context(), userID, &req)
 	if err != nil {
 		h.logger.Error("Failed to update user profile", zap.Error(err), zap.String("user_id", userID))
-		errorResponse(c, http.StatusConflict, "Failed to update profile", err)
+		mreturn.Error(c, http.StatusConflict, "Failed to update profile")
 		return
 	}
 
-	successResponse(c, user)
+	mreturn.Success(c, user)
 }
 
 // GetUserStats 获取用户统计信息
 // @Summary 获取用户统计信息
-// @Description 获取当前用户的统计信息，包括帖子、质押等数据
 // @Tags 用户
 // @Security BearerAuth
 // @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
 // @Router /v1/users/stats [get]
 func (h *UserHandler) GetUserStats(c *gin.Context) {
 	userID := getUserID(c)
@@ -210,52 +164,22 @@ func (h *UserHandler) GetUserStats(c *gin.Context) {
 	stats, err := h.userService.GetUserStats(c.Request.Context(), userID)
 	if err != nil {
 		h.logger.Error("Failed to get user stats", zap.Error(err), zap.String("user_id", userID))
-		errorResponse(c, http.StatusInternalServerError, "Failed to get user stats", err)
+		mreturn.InternalServerError(c, "Failed to get user stats")
 		return
 	}
 
-	successResponse(c, stats)
-}
-
-// GetBalance 获取用户余额
-// @Summary 获取用户余额
-// @Description 获取当前用户的BOSS币、质押和奖励余额
-// @Tags 用户
-// @Security BearerAuth
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
-// @Router /v1/users/balance [get]
-func (h *UserHandler) GetBalance(c *gin.Context) {
-	userID := getUserID(c)
-
-	balance, err := h.userService.GetBalance(c.Request.Context(), userID)
-	if err != nil {
-		h.logger.Error("Failed to get user balance", zap.Error(err), zap.String("user_id", userID))
-		errorResponse(c, http.StatusInternalServerError, "Failed to get balance", err)
-		return
-	}
-
-	successResponse(c, balance)
+	mreturn.Success(c, stats)
 }
 
 // SearchUsers 搜索用户
 // @Summary 搜索用户
-// @Description 根据关键词搜索用户
 // @Tags 用户
 // @Produce json
-// @Param keyword query string true "搜索关键词"
-// @Param page query int false "页码" default(1)
-// @Param page_size query int false "每页数量" default(20)
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
 // @Router /v1/users/search [get]
 func (h *UserHandler) SearchUsers(c *gin.Context) {
 	keyword := c.Query("keyword")
 	if keyword == "" {
-		errorResponse(c, http.StatusBadRequest, "keyword is required", nil)
+		mreturn.BadRequest(c, "keyword is required")
 		return
 	}
 
@@ -269,30 +193,23 @@ func (h *UserHandler) SearchUsers(c *gin.Context) {
 		pageSize = 20
 	}
 
-	response, err := h.userService.SearchUsers(c.Request.Context(), keyword, page, pageSize)
+	search_response, err := h.userService.SearchUsers(c.Request.Context(), keyword, page, pageSize)
 	if err != nil {
 		h.logger.Error("Failed to search users", zap.Error(err), zap.String("keyword", keyword))
-		errorResponse(c, http.StatusInternalServerError, "Failed to search users", err)
+		mreturn.InternalServerError(c, "Failed to search users")
 		return
 	}
 
-	successResponse(c, response)
+	mreturn.Success(c, search_response)
 }
 
 // 管理员功能
 
 // ListUsers 获取用户列表（管理员）
 // @Summary 获取用户列表
-// @Description 获取所有用户列表（管理员功能）
 // @Tags 管理员
 // @Security BearerAuth
 // @Produce json
-// @Param page query int false "页码" default(1)
-// @Param page_size query int false "每页数量" default(20)
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
-// @Failure 403 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
 // @Router /v1/admin/users [get]
 func (h *UserHandler) ListUsers(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -305,73 +222,57 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 		pageSize = 20
 	}
 
-	response, err := h.userService.ListUsers(c.Request.Context(), page, pageSize)
+	list_response, err := h.userService.ListUsers(c.Request.Context(), page, pageSize)
 	if err != nil {
 		h.logger.Error("Failed to list users", zap.Error(err))
-		errorResponse(c, http.StatusInternalServerError, "Failed to list users", err)
+		mreturn.InternalServerError(c, "Failed to list users")
 		return
 	}
 
-	successResponse(c, response)
+	mreturn.Success(c, list_response)
 }
 
 // GetUserByID 根据ID获取用户（管理员）
 // @Summary 根据ID获取用户
-// @Description 根据用户ID获取用户详细信息（管理员功能）
 // @Tags 管理员
 // @Security BearerAuth
 // @Produce json
-// @Param id path string true "用户ID"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
-// @Failure 403 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
 // @Router /v1/admin/users/{id} [get]
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	userID := c.Param("id")
 	if userID == "" {
-		errorResponse(c, http.StatusBadRequest, "user ID is required", nil)
+		mreturn.BadRequest(c, "user ID is required")
 		return
 	}
 
 	user, err := h.userService.GetUserByID(c.Request.Context(), userID)
 	if err != nil {
 		h.logger.Error("Failed to get user by ID", zap.Error(err), zap.String("user_id", userID))
-		errorResponse(c, http.StatusNotFound, "User not found", err)
+		mreturn.NotFound(c, "User not found")
 		return
 	}
 
-	successResponse(c, user)
+	mreturn.Success(c, user)
 }
 
 // DeleteUser 删除用户（管理员）
 // @Summary 删除用户
-// @Description 删除指定用户（管理员功能）
 // @Tags 管理员
 // @Security BearerAuth
-// @Param id path string true "用户ID"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
-// @Failure 403 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
 // @Router /v1/admin/users/{id} [delete]
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	userID := c.Param("id")
 	if userID == "" {
-		errorResponse(c, http.StatusBadRequest, "user ID is required", nil)
+		mreturn.BadRequest(c, "user ID is required")
 		return
 	}
 
 	err := h.userService.DeleteUser(c.Request.Context(), userID)
 	if err != nil {
 		h.logger.Error("Failed to delete user", zap.Error(err), zap.String("user_id", userID))
-		errorResponse(c, http.StatusInternalServerError, "Failed to delete user", err)
+		mreturn.InternalServerError(c, "Failed to delete user")
 		return
 	}
 
-	successResponse(c, gin.H{"message": "User deleted successfully"})
+	mreturn.SuccessWithMessage(c, "User deleted successfully", nil)
 }

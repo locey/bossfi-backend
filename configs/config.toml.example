@@ -1,0 +1,56 @@
+# 服务器配置
+[server]
+port = 8080
+mode = "debug"  # debug, release, test
+read_timeout = "60s"
+write_timeout = "60s"
+
+# 数据库配置
+[database]
+driver = "postgres"
+host = "localhost"
+port = 5432
+database = "bossfi"
+username = "your_db_username"
+password = "your_db_password"
+sslmode = "disable"
+timezone = "UTC"
+max_idle_conns = 10
+max_open_conns = 100
+conn_max_lifetime = "3600s"
+
+# Redis配置
+[redis]
+host = "localhost"
+port = 6379
+password = ""
+db = 0
+pool_size = 10
+min_idle_conns = 2
+
+# JWT配置
+[jwt]
+secret = "your-super-secret-jwt-key-change-this-in-production"
+expire_time = "24h"
+
+# 日志配置
+[logger]
+level = "debug"
+filename = "./logs/app.log"
+max_size = 100
+max_age = 30
+max_backups = 5
+compress = true
+
+# 区块链配置
+[blockchain]
+network = "testnet"  # mainnet, testnet
+confirmation_blocks = 6
+gas_price = 20000000000  # 20 gwei
+gas_limit = 21000
+
+# 安全配置
+[security]
+rate_limit = 100  # requests per minute
+cors_origins = ["*"]
+trusted_proxies = ["127.0.0.1"] 

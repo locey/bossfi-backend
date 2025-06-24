@@ -1,12 +1,12 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-
 	v1 "bossfi-blockchain-backend/internal/api/v1"
 	"bossfi-blockchain-backend/internal/service"
 	"bossfi-blockchain-backend/pkg/logger"
 	"bossfi-blockchain-backend/pkg/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
 // RegisterV1Routes 注册v1版本的路由
@@ -21,8 +21,8 @@ func RegisterV1Routes(
 
 	// 初始化处理器
 	userHandler := v1.NewUserHandler(userService, logger)
-	//postHandler := v1.NewPostHandler(postService, logger)
-	//stakeHandler := v1.NewStakeHandler(stakeService, logger)
+	postHandler := v1.NewPostHandler(postService, logger)
+	stakeHandler := v1.NewStakeHandler(stakeService, logger)
 
 	// 认证相关路由
 	auth := v1Group.Group("/auth")
@@ -37,7 +37,7 @@ func RegisterV1Routes(
 
 		// 公开路由
 		users.GET("/search", userHandler.SearchUsers)
-		//users.GET("/:user_id/posts", postHandler.GetUserPosts)
+		users.GET("/:user_id/posts", postHandler.GetUserPosts)
 
 		// 需要认证的路由
 		authenticated := users.Group("")
@@ -46,10 +46,9 @@ func RegisterV1Routes(
 			authenticated.GET("/profile", userHandler.GetProfile)
 			authenticated.PUT("/profile", userHandler.UpdateProfile)
 			authenticated.GET("/stats", userHandler.GetUserStats)
-			authenticated.GET("/balance", userHandler.GetBalance)
 		}
 	}
-	/**
+
 	// 帖子相关路由
 	posts := v1Group.Group("/posts")
 	{
@@ -107,5 +106,5 @@ func RegisterV1Routes(
 			adminStakes.GET("/stats", stakeHandler.GetStakeStats)
 		}
 	}
-	*/
+
 }

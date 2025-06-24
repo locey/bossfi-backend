@@ -56,14 +56,14 @@ func (t Tags) Value() (driver.Value, error) {
 
 // Post 帖子实体
 type Post struct {
-	ID           string          `gorm:"type:char(36);primaryKey" json:"id"`
-	AuthorID     string          `gorm:"type:char(36);not null;index" json:"author_id"`
+	ID           string          `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+	AuthorID     string          `gorm:"type:uuid;not null;index" json:"author_id"`
 	TokenID      *string         `gorm:"type:varchar(100);uniqueIndex" json:"token_id"`
 	Title        string          `gorm:"type:varchar(255);not null" json:"title"`
-	Content      *string         `gorm:"type:longtext" json:"content"`
-	PostType     PostType        `gorm:"type:enum('job','resume','discussion');not null" json:"post_type"`
-	Status       PostStatus      `gorm:"type:enum('draft','published','closed');default:'draft'" json:"status"`
-	Tags         Tags            `gorm:"type:json" json:"tags"`
+	Content      *string         `gorm:"type:text" json:"content"`
+	PostType     PostType        `gorm:"type:post_type_enum;not null" json:"post_type"`
+	Status       PostStatus      `gorm:"type:post_status_enum;default:'draft'" json:"status"`
+	Tags         Tags            `gorm:"type:jsonb" json:"tags"`
 	Salary       *string         `gorm:"type:varchar(100)" json:"salary"`
 	Location     *string         `gorm:"type:varchar(100)" json:"location"`
 	Company      *string         `gorm:"type:varchar(100)" json:"company"`
@@ -73,8 +73,8 @@ type Post struct {
 	LikeCount    int64           `gorm:"default:0" json:"like_count"`
 	ReplyCount   int64           `gorm:"default:0" json:"reply_count"`
 	IPFSHash     *string         `gorm:"type:varchar(255)" json:"ipfs_hash"`
-	CreatedAt    time.Time       `json:"created_at"`
-	UpdatedAt    time.Time       `json:"updated_at"`
+	CreatedAt    time.Time       `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt    time.Time       `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP" json:"updated_at"`
 	DeletedAt    gorm.DeletedAt  `gorm:"index" json:"-"`
 }
 

@@ -35,10 +35,6 @@ type UserService interface {
 	GetUserStats(ctx context.Context, userID string) (*repository.UserStats, error)
 	SearchUsers(ctx context.Context, keyword string, page, pageSize int) (*SearchUsersResponse, error)
 
-	// 余额管理
-	GetBalance(ctx context.Context, userID string) (*BalanceResponse, error)
-	UpdateBalance(ctx context.Context, userID string, bossBalance, stakedAmount, rewardBalance decimal.Decimal) error
-
 	// 管理员功能
 	ListUsers(ctx context.Context, page, pageSize int) (*ListUsersResponse, error)
 	GetUserByID(ctx context.Context, userID string) (*user.User, error)
@@ -328,25 +324,6 @@ func (s *userService) SearchUsers(ctx context.Context, keyword string, page, pag
 		PageSize:   pageSize,
 		TotalPages: totalPages,
 	}, nil
-}
-
-// GetBalance 获取用户余额
-func (s *userService) GetBalance(ctx context.Context, userID string) (*BalanceResponse, error) {
-	u, err := s.userRepo.GetByID(ctx, userID)
-	if err != nil {
-		return nil, err
-	}
-
-	return &BalanceResponse{
-		BossBalance:   u.BossBalance,
-		StakedAmount:  u.StakedAmount,
-		RewardBalance: u.RewardBalance,
-	}, nil
-}
-
-// UpdateBalance 更新用户余额
-func (s *userService) UpdateBalance(ctx context.Context, userID string, bossBalance, stakedAmount, rewardBalance decimal.Decimal) error {
-	return s.userRepo.UpdateBalance(ctx, userID, bossBalance, stakedAmount, rewardBalance)
 }
 
 // ListUsers 获取用户列表（管理员功能）

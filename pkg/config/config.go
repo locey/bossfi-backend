@@ -37,9 +37,8 @@ type DatabaseConfig struct {
 	Database        string        `mapstructure:"database"`
 	Username        string        `mapstructure:"username"`
 	Password        string        `mapstructure:"password"`
-	Charset         string        `mapstructure:"charset"`
-	ParseTime       bool          `mapstructure:"parse_time"`
-	Loc             string        `mapstructure:"loc"`
+	SSLMode         string        `mapstructure:"sslmode"`
+	Timezone        string        `mapstructure:"timezone"`
 	MaxIdleConns    int           `mapstructure:"max_idle_conns"`
 	MaxOpenConns    int           `mapstructure:"max_open_conns"`
 	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime"`
@@ -127,15 +126,14 @@ func setDefaults() {
 	viper.SetDefault("server.write_timeout", "30s")
 
 	// Database defaults
-	viper.SetDefault("database.driver", "mysql")
+	viper.SetDefault("database.driver", "postgres")
 	viper.SetDefault("database.host", "localhost")
-	viper.SetDefault("database.port", 3306)
+	viper.SetDefault("database.port", 5432)
 	viper.SetDefault("database.database", "bossfi")
-	viper.SetDefault("database.username", "root")
-	viper.SetDefault("database.password", "")
-	viper.SetDefault("database.charset", "utf8mb4")
-	viper.SetDefault("database.parse_time", true)
-	viper.SetDefault("database.loc", "Local")
+	viper.SetDefault("database.username", "bossfier")
+	viper.SetDefault("database.password", "bossfier")
+	viper.SetDefault("database.sslmode", "disable")
+	viper.SetDefault("database.timezone", "UTC")
 	viper.SetDefault("database.max_idle_conns", 10)
 	viper.SetDefault("database.max_open_conns", 100)
 	viper.SetDefault("database.conn_max_lifetime", "1h")
@@ -165,7 +163,7 @@ func setDefaults() {
 	// Security defaults
 	viper.SetDefault("security.rate_limit", 100)
 	viper.SetDefault("security.cors_origins", []string{"*"})
-	viper.SetDefault("security.trusted_proxies", []string{})
+	viper.SetDefault("security.trusted_proxies", []string{"127.0.0.1"})
 }
 
 func Get() *Config {

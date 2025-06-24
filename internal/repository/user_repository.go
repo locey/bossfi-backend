@@ -32,7 +32,6 @@ type UserRepository interface {
 	List(ctx context.Context, offset, limit int) ([]*user.User, int64, error)
 	Search(ctx context.Context, keyword string, offset, limit int) ([]*user.User, int64, error)
 	GetUserStats(ctx context.Context, userID string) (*UserStats, error)
-	UpdateBalance(ctx context.Context, userID string, bossBalance, stakedAmount, rewardBalance decimal.Decimal) error
 }
 
 // userRepository 用户仓储实现
@@ -199,16 +198,4 @@ func (r *userRepository) GetUserStats(ctx context.Context, userID string) (*User
 		})
 
 	return stats, nil
-}
-
-// UpdateBalance 更新用户余额
-func (r *userRepository) UpdateBalance(ctx context.Context, userID string, bossBalance, stakedAmount, rewardBalance decimal.Decimal) error {
-	return r.db.WithContext(ctx).
-		Model(&user.User{}).
-		Where("id = ?", userID).
-		Updates(map[string]interface{}{
-			"boss_balance":   bossBalance,
-			"staked_amount":  stakedAmount,
-			"reward_balance": rewardBalance,
-		}).Error
 }
