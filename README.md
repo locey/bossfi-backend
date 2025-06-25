@@ -7,7 +7,7 @@
 
 1. 文件名：全小写，单词间用下划线 如：config_loader.go
 2. 函数/变量：驼峰式命名（CamelCase） 如：getUserInfo()、GetUserInfo()
-3. 包名：推荐使用简洁、小写的单个单词命名，确实需要多个单词，可以如：package user_utils
+3. 包名：推荐使用简洁、小写的单个单词命名，确实需要多个单词，可以如：package userutils
 
 参考：https://go.dev/doc/effective_go#file_names
 
@@ -18,17 +18,17 @@
 ├── sql/                      # SQL脚本目录
 │   └── bossfi.sql
 ├── src/                      # 源代码目录
-│   ├── app/                  # 应用程序目录
-│   │   ├── model/            # 数据模型目录
+│   ├── app/                  # 应用程序目录（日常业务需求在此层开发）
+│   │   ├── model/            # 数据模型目录（结构体 + 基础CRUD）
 │   │   │   └── demo.go
 │   │   ├── router/           # 路由目录
 │   │   │   └── router_v1.go
-│   │   ├── service/          # 服务层目录
+│   │   ├── service/          # 服务层目录（对Model层的编排）
 │   │   │   └── demo.go
-│   │   └── controller/       # 控制器目录
+│   │   └── api/              # 控制器目录（路由 + 参数校验 + 业务处理：调用Service）
 │   │       ├── evm.go
 │   │       └── demo.go
-│   ├── core/                 # 核心功能目录
+│   ├── core/                 # 核心功能目录（业务层面开发不动此包）
 │   │   ├── db/               # 数据库相关目录
 │   │   │   ├── init.go
 │   │   │   ├── pgsql.go
@@ -94,6 +94,8 @@
 2. 复制 `config.toml.example` 为 `config.toml` 并修改配置
 3. 运行 `go mod tidy` 安装依赖
 4. 运行 `go run main.go` 启动服务
+5. 安装 swag 命令 `go install github.com/swaggo/swag/cmd/swag@latest`
+6. 生成swagger文档 `swag init -g src/main.go -o src/docs`
 
 ## API 文档(后续增加swagger)
 

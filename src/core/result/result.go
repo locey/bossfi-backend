@@ -62,7 +62,7 @@ var ErrMsgMap = map[int]map[int]string{
 	},
 	DBUpdateFailed: {
 		LANG_ZH: "更新失败",
-		LANG_EN: "Update failed",
+		LANG_EN: "UpdateById failed",
 	},
 	DBQueryFailed: {
 		LANG_ZH: "查询失败",
@@ -70,7 +70,7 @@ var ErrMsgMap = map[int]map[int]string{
 	},
 	DBDeleteFailed: {
 		LANG_ZH: "删除失败",
-		LANG_EN: "Delete failed",
+		LANG_EN: "DeleteById failed",
 	},
 	DBNotExist: {
 		LANG_ZH: "数据不存在",

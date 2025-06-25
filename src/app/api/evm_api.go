@@ -1,4 +1,4 @@
-package controller
+package api
 
 import (
 	"bossfi-backend/src/common/chain"
@@ -11,8 +11,14 @@ import (
 	"strconv"
 )
 
+type EvmApi struct{}
+
+func NewEvmApi() *EvmApi {
+	return &EvmApi{}
+}
+
 // GetBlockByNum curl "http://localhost:8000/api/v1/evm/get_block_by_num/8615565"
-func GetBlockByNum(c *gin.Context) {
+func (e *EvmApi) GetBlockByNum(c *gin.Context) {
 	blockNumString := c.Params.ByName("block_num")
 	if blockNumString == "" {
 		result.Error(c, result.InvalidParameter)

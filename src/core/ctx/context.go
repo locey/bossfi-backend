@@ -4,6 +4,7 @@ import (
 	"bossfi-backend/src/core/chainclient"
 	"bossfi-backend/src/core/config"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/gin-gonic/gin"
 	"github.com/gomodule/redigo/redis"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -17,6 +18,7 @@ type Context struct {
 	Redis    *redis.Pool
 	Log      *zap.Logger
 	ChainMap map[int]*chainclient.ChainClient
+	Gin      *gin.Engine
 }
 
 func GetEvmClient(chainId int) *ethclient.Client {

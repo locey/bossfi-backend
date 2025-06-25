@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap/zapcore"
 	"io"
 	"io/ioutil"
+	"strings"
 	"time"
 )
 
@@ -44,6 +45,11 @@ func HttpLogMiddleware() gin.HandlerFunc {
 
 		// 调用下一个处理器
 		c.Next()
+
+		if strings.Contains(path, "/swagger") {
+			// 过滤swagger日志
+			return
+		}
 
 		// 获取响应体
 		responseBody := bodyLogWriter.body.Bytes()

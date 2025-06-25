@@ -1,23 +1,33 @@
 package router
 
 import (
-	"bossfi-backend/src/app/controller"
+	"bossfi-backend/src/app/api"
 	"bossfi-backend/src/core/config"
 	"bossfi-backend/src/core/ctx"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func Bind(r *gin.Engine, ctx *ctx.Context) {
-	api := r.Group("/api/" + config.Conf.App.Version)
+	// 注册 swagger 路由
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	v := r.Group("/api/" + config.Conf.App.Version)
+
 	{
-		api.GET("/demo/page", controller.PageDemo)
-		api.POST("/demo", controller.CreateDemo)
-		api.GET("/demo/:id", controller.GetDemoByID)
-		api.PUT("/demo/:id", controller.UpdateDemo)
-		api.DELETE("/demo/:id", controller.DeleteDemo)
-		api.GET("/demo/list", controller.ListDemo)
-
-		api.GET("/evm/get_block_by_num/:block_num", controller.GetBlockByNum)
-
+		demoApi := api.NewDemoApi()
+		v.GET("/demo/page", demoApi.Page)
+		v.POST("/demo/create", demoApi.Create)
+		v.GET("/demo/:id", demoApi.GetById)
+		v.PUT("/demo/:id", demoApi.Update)
+		v.DELETE("/demo/:id", demoApi.Delete)
+		v.GET("/demo/list", demoApi.List)
 	}
+
+	{
+		evmApi := api.NewEvmApi()
+		v.GET("/evm/get_block_by_num/:block_num", evmApi.GetBlockByNum)
+	}
+
 }

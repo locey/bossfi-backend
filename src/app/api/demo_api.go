@@ -1,4 +1,4 @@
-package controller
+package api
 
 import (
 	"bossfi-backend/src/app/model"
@@ -8,26 +8,41 @@ import (
 	"strconv"
 )
 
-var demoService = service.NewDemoService()
+type DemoApi struct {
+	svc *service.DemoService
+}
 
-// CreateDemo 创建数据
-func CreateDemo(c *gin.Context) {
-	var req model.BossfiDemo
+func NewDemoApi() *DemoApi {
+	return &DemoApi{
+		svc: service.NewDemoService(),
+	}
+}
+
+// Create godoc
+// @Summary      创建数据
+// @Description  用于测试服务器连通性
+// @Tags         示例接口
+// @Accept       json
+// @Produce      json
+// @Success      200 {object} map[string]string
+// @Router       /demo/create [POST]
+func (s *DemoApi) Create(c *gin.Context) {
+	var req model.Demo
 	if err := c.ShouldBindJSON(&req); err != nil {
 		result.Error(c, result.InvalidParameter)
 		return
 	}
-	if err := demoService.Create(&req); err != nil {
+	if err := s.svc.Create(&req); err != nil {
 		result.Error(c, result.DBCreateFailed)
 		return
 	}
 	result.OK(c, req)
 }
 
-// GetDemoByID 查询数据
-func GetDemoByID(c *gin.Context) {
+// GetById 查询数据
+func (s *DemoApi) GetById(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	demo, err := demoService.GetByID(id)
+	demo, err := s.svc.GetById(id)
 	if err != nil {
 		result.Error(c, result.DBNotExist)
 		return
@@ -35,35 +50,35 @@ func GetDemoByID(c *gin.Context) {
 	result.OK(c, demo)
 }
 
-// UpdateDemo 更新数据
-func UpdateDemo(c *gin.Context) {
+// Update 更新数据
+func (s *DemoApi) Update(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	var req model.BossfiDemo
+	var req model.Demo
 	if err := c.ShouldBindJSON(&req); err != nil {
 		result.Error(c, result.InvalidParameter)
 		return
 	}
 	req.ID = id
-	if err := demoService.Update(&req); err != nil {
+	if err := s.svc.Update(&req); err != nil {
 		result.Error(c, result.DBUpdateFailed)
 		return
 	}
 	result.OK(c, req)
 }
 
-// DeleteDemo 删除数据
-func DeleteDemo(c *gin.Context) {
+// Delete 删除数据
+func (s *DemoApi) Delete(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err := demoService.Delete(id); err != nil {
+	if err := s.svc.Delete(id); err != nil {
 		result.Error(c, result.DBDeleteFailed)
 		return
 	}
 	result.OK(c, nil)
 }
 
-// ListDemo 查询列表
-func ListDemo(c *gin.Context) {
-	list, err := demoService.List()
+// List 查询列表
+func (s *DemoApi) List(c *gin.Context) {
+	list, err := s.svc.List()
 	if err != nil {
 		result.Error(c, result.DBQueryFailed)
 		return
@@ -71,15 +86,15 @@ func ListDemo(c *gin.Context) {
 	result.OK(c, list)
 }
 
-// PageDemo 分页查询数据
-func PageDemo(c *gin.Context) {
+// Page 分页查询数据
+func (s *DemoApi) Page(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
 	pageSizeStr := c.DefaultQuery("page_size", "10")
 
 	page, _ := strconv.Atoi(pageStr)
 	pageSize, _ := strconv.Atoi(pageSizeStr)
 
-	list, total, err := demoService.Page(page, pageSize)
+	list, total, err := s.svc.Page(page, pageSize)
 	if err != nil {
 		result.Error(c, result.DBQueryFailed)
 		return

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"os"
 )
 
 func InitPgsql() *gorm.DB {
@@ -17,7 +19,12 @@ func InitPgsql() *gorm.DB {
 		config.Conf.Pgsql.Database,
 		config.Conf.Pgsql.Port,
 	)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
+	gormConfig := &gorm.Config{}
+	if os.Getenv("GORM_DEBUG") == "true" {
+		gormConfig.Logger = logger.Default.LogMode(logger.Info)
+	}
+	db, err := gorm.Open(postgres.Open(dsn), gormConfig)
 	if err != nil {
 		panic(err)
 	}

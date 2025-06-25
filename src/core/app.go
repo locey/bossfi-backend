@@ -74,6 +74,7 @@ func initChainClient() {
 
 func initGin() {
 	r := router.InitRouter()
+	ctx.Ctx.Gin = r
 	appRouter.Bind(r, &ctx.Ctx)
 	err := r.Run(":" + ctx.Ctx.Config.App.Port)
 	if err != nil {
