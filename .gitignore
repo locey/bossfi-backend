@@ -4,51 +4,44 @@
 *.dll
 *.so
 *.dylib
-bossfi-blockchain-backend
-bossfi-blockchain-backend_unix
-main
-main.exe
+bossfi-backend
 
-# 测试二进制文件
+# 测试二进制文件，使用 go test -c 构建
 *.test
 
-# 输出的二进制文件（从Go 1.10开始）
+# 输出的二进制文件 (go build)
+main
+
+# 覆盖率文件
 *.out
+coverage.html
 
-# Go workspace file
-go.work
-
-# 依赖模块
-vendor/
-
-# IDE文件
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# 日志文件
-logs/
-*.log
+# 依赖分析文件
+go.sum
 
 # 临时文件
-tmp/
-temp/
+*.tmp
+*.swp
+*.swo
+*~
 
-# 配置文件（可能包含敏感信息）
-configs/config.toml
-configs/config.local.toml
-configs/config.prod.toml
+# 日志文件
+*.log
+logs/
+
+# 环境变量文件
 .env
 .env.local
+.env.development
+.env.test
 .env.production
 
-# 数据库文件
-*.db
-*.sqlite
-*.sqlite3
+# IDE 文件
+.vscode/
+.idea/
+*.iml
 
-# 操作系统生成的文件
+# OS 生成的文件
 .DS_Store
 .DS_Store?
 ._*
@@ -57,31 +50,31 @@ configs/config.prod.toml
 ehthumbs.db
 Thumbs.db
 
-# 编译错误日志
-build-errors.log
+# 依赖目录
+vendor/
 
-# SSL证书
-ssl/
-*.pem
-*.key
-*.crt
+# Air 实时重载工具
+tmp/
 
-# Docker相关
-docker-compose.override.yml
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
 
-# Swagger生成的文档
-docs/docs.go
-docs/swagger.json
-docs/swagger.yaml
+# 缓存目录
+.cache/
 
-# 上传文件
-uploads/
-static/uploads/
+# 编译后的二进制文件
+bin/
+build/
+dist/
+
+# 调试文件
+debug
+debug.test
+
+# GoLand
+.idea/
 
 # 备份文件
-*.bak
-*.backup
-
-# 缓存文件
-.cache/
-cache/ 
+*.bak 

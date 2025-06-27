@@ -1,1474 +1,235 @@
-basePath: /api
+basePath: /api/v1
 definitions:
-  api.Response:
-    description: API统一响应格式
+  controllers.GetNonceRequest:
     properties:
-      code:
-        description: 响应码，0表示成功
-        example: 0
-        type: integer
-      data:
-        description: 响应数据
-      message:
-        description: 响应消息
-        example: success
-        type: string
-    type: object
-  post.PostType:
-    enum:
-    - job
-    - resume
-    - discussion
-    type: string
-    x-enum-comments:
-      PostTypeDiscussion: 讨论
-      PostTypeJob: 招聘
-      PostTypeResume: 简历
-    x-enum-varnames:
-    - PostTypeJob
-    - PostTypeResume
-    - PostTypeDiscussion
-  repository.StakeStats:
-    properties:
-      active_stakes:
-        type: integer
-      average_amount:
-        type: number
-      completed_stakes:
-        type: integer
-      total_amount:
-        type: number
-      total_rewards:
-        type: number
-      total_stakes:
-        type: integer
-      unstaking_stakes:
-        type: integer
-    type: object
-  repository.UserStakeStats:
-    properties:
-      active_amount:
-        type: number
-      active_stakes:
-        type: integer
-      completed_stakes:
-        type: integer
-      pending_rewards:
-        type: number
-      total_amount:
-        type: number
-      total_rewards:
-        type: number
-      total_stakes:
-        type: integer
-      unstaking_stakes:
-        type: integer
-      user_id:
-        type: string
-    type: object
-  service.ClaimRewardsResponse:
-    properties:
-      claimed_amount:
-        type: number
-      new_balance:
-        type: number
-    type: object
-  service.CreatePostRequest:
-    properties:
-      company:
-        type: string
-      content:
-        type: string
-      location:
-        type: string
-      post_type:
-        $ref: '#/definitions/post.PostType'
-      requirements:
-        type: string
-      salary:
-        type: string
-      tags:
-        items:
-          type: string
-        type: array
-      title:
-        maxLength: 255
+      wallet_address:
+        example: 0x1234567890123456789012345678901234567890
         type: string
     required:
-    - post_type
-    - title
+    - wallet_address
     type: object
-  service.DistributeRewardsResponse:
-    properties:
-      failed_count:
-        type: integer
-      processed_count:
-        type: integer
-      total_reward:
-        type: number
-    type: object
-  service.ListStakesResponse:
-    properties:
-      page:
-        type: integer
-      page_size:
-        type: integer
-      stakes:
-        items:
-          $ref: '#/definitions/stake.Stake'
-        type: array
-      total:
-        type: integer
-      total_pages:
-        type: integer
-    type: object
-  service.UpdatePostRequest:
-    properties:
-      company:
-        type: string
-      content:
-        type: string
-      location:
-        type: string
-      requirements:
-        type: string
-      salary:
-        type: string
-      tags:
-        items:
-          type: string
-        type: array
-      title:
-        type: string
-    type: object
-  service.UpdateProfileRequest:
-    properties:
-      avatar:
-        type: string
-      bio:
-        type: string
-      email:
-        type: string
-      username:
-        type: string
-    type: object
-  stake.Stake:
-    properties:
-      amount:
-        type: number
-      created_at:
-        type: string
-      id:
-        type: string
-      last_reward_at:
-        type: string
-      reward_earned:
-        type: number
-      staked_at:
-        type: string
-      status:
-        $ref: '#/definitions/stake.StakeStatus'
-      unstake_request_at:
-        type: string
-      unstaked_at:
-        type: string
-      updated_at:
-        type: string
-      user_id:
-        type: string
-    type: object
-  stake.StakeStatus:
-    enum:
-    - active
-    - unstaking
-    - completed
-    type: string
-    x-enum-comments:
-      StakeStatusActive: 活跃
-      StakeStatusCompleted: 已完成
-      StakeStatusUnstaking: 解质押中
-    x-enum-varnames:
-    - StakeStatusActive
-    - StakeStatusUnstaking
-    - StakeStatusCompleted
-  v1.LoginRequest:
+  controllers.GetNonceResponse:
     properties:
       message:
+        example: Welcome to BossFi!...
+        type: string
+      nonce:
+        example: abc123def456
+        type: string
+    type: object
+  controllers.LoginRequest:
+    properties:
+      message:
+        example: Welcome to BossFi!...
         type: string
       signature:
+        example: 0x1234567890abcdef...
         type: string
       wallet_address:
+        example: 0x1234567890123456789012345678901234567890
         type: string
     required:
     - message
     - signature
     - wallet_address
     type: object
-  v1.LoginResponse:
+  controllers.LoginResponse:
     properties:
       token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         type: string
       user: {}
     type: object
-  v1.NonceRequest:
-    properties:
-      wallet_address:
-        type: string
-    required:
-    - wallet_address
-    type: object
-  v1.NonceResponse:
+  routes.HealthResponse:
     properties:
       message:
+        example: BossFi Backend is running
+        type: string
+      status:
+        example: ok
+        type: string
+      system:
+        additionalProperties:
+          type: string
+        type: object
+      timestamp:
+        example: "2025-06-26T15:50:00Z"
+        type: string
+      trace_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      uptime:
+        example: 2h30m45s
+        type: string
+      version:
+        example: 1.0.0
         type: string
     type: object
 host: localhost:8080
 info:
   contact:
-    email: support@bossfi.io
+    email: support@bossfi.com
     name: BossFi Team
-    url: https://bossfi.io
-  description: BossFi区块链招聘论坛后端API
+    url: https://www.bossfi.com
+  description: BossFi区块链后端API服务，支持钱包登录、用户管理、区块链数据同步等功能
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-  termsOfService: https://bossfi.io/terms
+  termsOfService: https://www.bossfi.com/terms
   title: BossFi Backend API
-  version: "1.0"
+  version: 1.0.0
 paths:
-  /admin/stakes/distribute:
-    post:
-      description: 分发质押奖励给所有符合条件的用户（管理员功能）
-      responses:
-        "200":
-          description: 成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/api.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/service.DistributeRewardsResponse'
-              type: object
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/api.Response'
-        "403":
-          description: 权限不足
-          schema:
-            $ref: '#/definitions/api.Response'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/api.Response'
-      security:
-      - BearerAuth: []
-      summary: 分发奖励
-      tags:
-      - 管理员
-  /admin/stakes/stats:
-    get:
-      description: 获取系统质押统计信息（管理员功能）
-      responses:
-        "200":
-          description: 成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/api.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/repository.StakeStats'
-              type: object
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/api.Response'
-        "403":
-          description: 权限不足
-          schema:
-            $ref: '#/definitions/api.Response'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/api.Response'
-      security:
-      - BearerAuth: []
-      summary: 获取质押统计信息
-      tags:
-      - 管理员
-  /stakes:
+  /auth/login:
     post:
       consumes:
       - application/json
-      description: 创建新的质押记录
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: 成功
-          schema:
-            type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            type: object
-        "401":
-          description: 未授权
-          schema:
-            type: object
-        "500":
-          description: 服务器错误
-          schema:
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 创建质押
-      tags:
-      - 质押
-  /stakes/{id}:
-    get:
-      description: 根据ID获取质押详细信息
+      description: 使用钱包签名进行登录验证，验证成功后返回JWT令牌
       parameters:
-      - description: 质押ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/api.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/stake.Stake'
-              type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/api.Response'
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/api.Response'
-        "404":
-          description: 质押不存在
-          schema:
-            $ref: '#/definitions/api.Response'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/api.Response'
-      security:
-      - BearerAuth: []
-      summary: 获取质押详情
-      tags:
-      - 质押
-  /stakes/{id}/complete:
-    post:
-      description: 完成解质押指定的质押记录
-      parameters:
-      - description: 质押ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: 成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/api.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/stake.Stake'
-              type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/api.Response'
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/api.Response'
-        "404":
-          description: 质押不存在
-          schema:
-            $ref: '#/definitions/api.Response'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/api.Response'
-      security:
-      - BearerAuth: []
-      summary: 完成解质押
-      tags:
-      - 质押
-  /stakes/{id}/unstake:
-    post:
-      description: 请求解质押指定的质押记录
-      parameters:
-      - description: 质押ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: 成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/api.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/stake.Stake'
-              type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/api.Response'
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/api.Response'
-        "404":
-          description: 质押不存在
-          schema:
-            $ref: '#/definitions/api.Response'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/api.Response'
-      security:
-      - BearerAuth: []
-      summary: 请求解质押
-      tags:
-      - 质押
-  /stakes/rewards/claim:
-    post:
-      description: 领取用户的质押奖励
-      responses:
-        "200":
-          description: 成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/api.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/service.ClaimRewardsResponse'
-              type: object
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/api.Response'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/api.Response'
-      security:
-      - BearerAuth: []
-      summary: 领取奖励
-      tags:
-      - 质押
-  /stakes/user/{user_id}:
-    get:
-      description: 获取指定用户的质押列表
-      parameters:
-      - description: 用户ID
-        in: path
-        name: user_id
-        required: true
-        type: string
-      - default: 1
-        description: 页码
-        in: query
-        name: page
-        type: integer
-      - default: 20
-        description: 每页数量
-        in: query
-        name: page_size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/api.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/service.ListStakesResponse'
-              type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/api.Response'
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/api.Response'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/api.Response'
-      security:
-      - BearerAuth: []
-      summary: 获取用户质押列表
-      tags:
-      - 质押
-  /stakes/user/{user_id}/stats:
-    get:
-      description: 获取指定用户的质押统计信息
-      parameters:
-      - description: 用户ID
-        in: path
-        name: user_id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: 成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/api.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/repository.UserStakeStats'
-              type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/api.Response'
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/api.Response'
-        "500":
-          description: 服务器错误
-          schema:
-            $ref: '#/definitions/api.Response'
-      security:
-      - BearerAuth: []
-      summary: 获取用户质押统计信息
-      tags:
-      - 质押
-  /v1/admin/users:
-    get:
-      description: 获取所有用户列表（管理员功能）
-      parameters:
-      - default: 1
-        description: 页码
-        in: query
-        name: page
-        type: integer
-      - default: 20
-        description: 每页数量
-        in: query
-        name: page_size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: Forbidden
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 获取用户列表
-      tags:
-      - 管理员
-  /v1/admin/users/{id}:
-    delete:
-      description: 删除指定用户（管理员功能）
-      parameters:
-      - description: 用户ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: Forbidden
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 删除用户
-      tags:
-      - 管理员
-    get:
-      description: 根据用户ID获取用户详细信息（管理员功能）
-      parameters:
-      - description: 用户ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: Forbidden
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 根据ID获取用户
-      tags:
-      - 管理员
-  /v1/auth/login:
-    post:
-      consumes:
-      - application/json
-      description: 使用钱包签名进行用户登录
-      parameters:
-      - description: 登录请求
+      - description: 登录信息
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.LoginRequest'
+          $ref: '#/definitions/controllers.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 登录成功
           schema:
-            $ref: '#/definitions/v1.LoginResponse'
+            $ref: '#/definitions/controllers.LoginResponse'
         "400":
-          description: Bad Request
+          description: 请求参数错误
           schema:
             additionalProperties: true
             type: object
         "401":
-          description: Unauthorized
+          description: 认证失败
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: Internal Server Error
+          description: 服务器内部错误
           schema:
             additionalProperties: true
             type: object
-      summary: 用户登录
+      summary: 钱包签名登录
       tags:
-      - auth
-  /v1/auth/nonce:
+      - 认证
+  /auth/logout:
     post:
       consumes:
       - application/json
-      description: 为钱包地址生成登录nonce
+      description: 用户登出，清除服务器端会话信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登出成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未认证
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: 用户登出
+      tags:
+      - 认证
+  /auth/nonce:
+    post:
+      consumes:
+      - application/json
+      description: 前端调用此接口获取需要签名的消息和 nonce，用于钱包登录
       parameters:
-      - description: nonce请求
+      - description: 钱包地址信息
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.NonceRequest'
+          $ref: '#/definitions/controllers.GetNonceRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 成功返回签名消息和nonce
           schema:
-            $ref: '#/definitions/v1.NonceResponse'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: 生成登录nonce
-      tags:
-      - auth
-  /v1/posts:
-    get:
-      description: 获取帖子列表，支持分页和过滤
-      parameters:
-      - default: 1
-        description: 页码
-        in: query
-        name: page
-        type: integer
-      - default: 20
-        description: 每页数量
-        in: query
-        name: page_size
-        type: integer
-      - description: 帖子类型
-        in: query
-        name: type
-        type: string
-      - description: 帖子状态
-        in: query
-        name: status
-        type: string
-      - description: 公司名称
-        in: query
-        name: company
-        type: string
-      - description: 工作地点
-        in: query
-        name: location
-        type: string
-      - description: 标签
-        in: query
-        name: tags
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功
-          schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/controllers.GetNonceResponse'
         "400":
           description: 请求参数错误
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: 服务器错误
+          description: 服务器内部错误
           schema:
             additionalProperties: true
             type: object
-      summary: 获取帖子列表
+      summary: 获取用于钱包签名的消息和 nonce
       tags:
-      - 帖子
-    post:
+      - 认证
+  /auth/profile:
+    get:
       consumes:
       - application/json
-      description: 创建新的帖子
-      parameters:
-      - description: 创建帖子请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/service.CreatePostRequest'
+      description: 获取当前登录用户的详细个人信息
       produces:
       - application/json
       responses:
-        "201":
-          description: 成功
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: 服务器错误
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 创建帖子
-      tags:
-      - 帖子
-  /v1/posts/{id}:
-    delete:
-      description: 删除指定帖子
-      parameters:
-      - description: 帖子ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
         "200":
-          description: 成功
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: 请求参数错误
+          description: 用户信息
           schema:
             additionalProperties: true
             type: object
         "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 权限不足
+          description: 未认证
           schema:
             additionalProperties: true
             type: object
         "404":
-          description: 帖子不存在
+          description: 用户不存在
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: 服务器错误
+          description: 服务器内部错误
           schema:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
-      summary: 删除帖子
+      - Bearer: []
+      summary: 获取用户个人信息
       tags:
-      - 帖子
+      - 认证
+  /health:
     get:
-      description: 根据ID获取帖子详细信息
-      parameters:
-      - description: 帖子ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: 帖子不存在
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: 服务器错误
-          schema:
-            additionalProperties: true
-            type: object
-      summary: 获取帖子详情
-      tags:
-      - 帖子
-    put:
       consumes:
       - application/json
-      description: 更新帖子信息
-      parameters:
-      - description: 帖子ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: 更新帖子请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/service.UpdatePostRequest'
+      description: 检查服务器是否正常运行，返回系统状态信息和TraceID
       produces:
       - application/json
       responses:
         "200":
-          description: 成功
+          description: 服务正常
           schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 权限不足
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: 帖子不存在
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: 服务器错误
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 更新帖子
+            $ref: '#/definitions/routes.HealthResponse'
+      summary: 健康检查
       tags:
-      - 帖子
-  /v1/posts/{id}/close:
-    post:
-      description: 关闭指定帖子
-      parameters:
-      - description: 帖子ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: 成功
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 权限不足
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: 帖子不存在
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: 服务器错误
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 关闭帖子
-      tags:
-      - 帖子
-  /v1/posts/{id}/like:
-    post:
-      description: 对指定帖子进行点赞
-      parameters:
-      - description: 帖子ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: 成功
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: 帖子不存在
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: 服务器错误
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 点赞帖子
-      tags:
-      - 帖子
-  /v1/posts/{id}/publish:
-    post:
-      description: 将草稿状态的帖子发布
-      parameters:
-      - description: 帖子ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: 成功
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 权限不足
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: 帖子不存在
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: 服务器错误
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 发布帖子
-      tags:
-      - 帖子
-  /v1/posts/{id}/unlike:
-    post:
-      description: 取消对指定帖子的点赞
-      parameters:
-      - description: 帖子ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: 成功
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: 帖子不存在
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: 服务器错误
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 取消点赞帖子
-      tags:
-      - 帖子
-  /v1/posts/popular:
-    get:
-      description: 获取热门帖子列表
-      parameters:
-      - default: 1
-        description: 页码
-        in: query
-        name: page
-        type: integer
-      - default: 20
-        description: 每页数量
-        in: query
-        name: page_size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: 服务器错误
-          schema:
-            additionalProperties: true
-            type: object
-      summary: 获取热门帖子
-      tags:
-      - 帖子
-  /v1/posts/search:
-    get:
-      description: 根据关键词搜索帖子
-      parameters:
-      - description: 搜索关键词
-        in: query
-        name: keyword
-        required: true
-        type: string
-      - default: 1
-        description: 页码
-        in: query
-        name: page
-        type: integer
-      - default: 20
-        description: 每页数量
-        in: query
-        name: page_size
-        type: integer
-      - description: 帖子类型
-        in: query
-        name: type
-        type: string
-      - description: 工作地点
-        in: query
-        name: location
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: 服务器错误
-          schema:
-            additionalProperties: true
-            type: object
-      summary: 搜索帖子
-      tags:
-      - 帖子
-  /v1/posts/trending:
-    get:
-      description: 获取趋势帖子列表
-      parameters:
-      - default: 1
-        description: 页码
-        in: query
-        name: page
-        type: integer
-      - default: 20
-        description: 每页数量
-        in: query
-        name: page_size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: 服务器错误
-          schema:
-            additionalProperties: true
-            type: object
-      summary: 获取趋势帖子
-      tags:
-      - 帖子
-  /v1/users/{user_id}/posts:
-    get:
-      description: 获取指定用户的帖子列表
-      parameters:
-      - description: 用户ID
-        in: path
-        name: user_id
-        required: true
-        type: string
-      - default: 1
-        description: 页码
-        in: query
-        name: page
-        type: integer
-      - default: 20
-        description: 每页数量
-        in: query
-        name: page_size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: 服务器错误
-          schema:
-            additionalProperties: true
-            type: object
-      summary: 获取用户帖子
-      tags:
-      - 帖子
-  /v1/users/balance:
-    get:
-      description: 获取当前用户的BOSS币、质押和奖励余额
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 获取用户余额
-      tags:
-      - 用户
-  /v1/users/profile:
-    get:
-      description: 获取当前用户的详细资料信息
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 获取用户资料
-      tags:
-      - 用户
-    put:
-      consumes:
-      - application/json
-      description: 更新当前用户的资料信息
-      parameters:
-      - description: 更新资料请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/service.UpdateProfileRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "409":
-          description: Conflict
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 更新用户资料
-      tags:
-      - 用户
-  /v1/users/search:
-    get:
-      description: 根据关键词搜索用户
-      parameters:
-      - description: 搜索关键词
-        in: query
-        name: keyword
-        required: true
-        type: string
-      - default: 1
-        description: 页码
-        in: query
-        name: page
-        type: integer
-      - default: 20
-        description: 每页数量
-        in: query
-        name: page_size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: 搜索用户
-      tags:
-      - 用户
-  /v1/users/stats:
-    get:
-      description: 获取当前用户的统计信息，包括帖子、质押等数据
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 获取用户统计信息
-      tags:
-      - 用户
+      - 系统
+schemes:
+- http
+- https
 securityDefinitions:
-  BearerAuth:
-    description: Type "Bearer" followed by a space and JWT token.
+  Bearer:
+    description: 输入Bearer {token}
     in: header
     name: Authorization
     type: apiKey
