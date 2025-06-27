@@ -69,8 +69,8 @@ create_directories() {
     log "创建目录结构..."
     
     mkdir -p $BACKUP_DIR
-    mkdir -p $DEPLOY_DIR/logs
-    mkdir -p $DEPLOY_DIR/deploy/ssl
+    mkdir -p $PROJECT_ROOT/logs
+    mkdir -p $SCRIPT_DIR/ssl
     mkdir -p /var/www/frontend
     
     log "目录结构创建完成"
@@ -78,7 +78,7 @@ create_directories() {
 
 # 备份数据
 backup_data() {
-    if [ -d "$DEPLOY_DIR" ]; then
+    if [ -d "$PROJECT_ROOT" ]; then
         log "备份现有数据..."
         
         BACKUP_FILE="$BACKUP_DIR/backup_$(date +%Y%m%d_%H%M%S).tar.gz"
@@ -90,7 +90,7 @@ backup_data() {
         fi
         
         # 备份配置文件
-        tar -czf $BACKUP_FILE -C $DEPLOY_DIR/deploy . 2>/dev/null || true
+        tar -czf $BACKUP_FILE -C $SCRIPT_DIR . 2>/dev/null || true
         
         log "数据备份完成: $BACKUP_FILE"
     fi
@@ -100,7 +100,7 @@ backup_data() {
 stop_services() {
     log "停止现有服务..."
     
-    cd $DEPLOY_DIR/deploy
+    cd $SCRIPT_DIR
     if [ -f "docker-compose.prod.yml" ]; then
         docker-compose -f docker-compose.prod.yml down || true
     fi
@@ -116,15 +116,15 @@ deploy_new_version() {
     log "部署新版本..."
     
     # 检查部署文件是否存在
-    if [ ! -f "$DEPLOY_DIR/deploy/docker-compose.prod.yml" ]; then
-        error "Docker Compose 文件不存在: $DEPLOY_DIR/deploy/docker-compose.prod.yml"
+    if [ ! -f "$SCRIPT_DIR/docker-compose.prod.yml" ]; then
+        error "Docker Compose 文件不存在: $SCRIPT_DIR/docker-compose.prod.yml"
     fi
     
     # 设置权限
-    chmod +x $DEPLOY_DIR/deploy/*.sh
-    chmod 600 $DEPLOY_DIR/deploy/env.prod
+    chmod +x $SCRIPT_DIR/*.sh
+    chmod 600 $SCRIPT_DIR/env.prod
     
-    cd $DEPLOY_DIR/deploy
+    cd $SCRIPT_DIR
     
     # 构建并启动服务
     log "构建Docker镜像..."
@@ -221,9 +221,9 @@ main() {
     log "  - API文档: http://your-server-ip/swagger/index.html"
     
     log "📊 监控命令:"
-    log "  - 查看状态: sudo $DEPLOY_DIR/deploy/monitor.sh status"
-    log "  - 查看日志: sudo $DEPLOY_DIR/deploy/monitor.sh logs"
-    log "  - 重启服务: sudo $DEPLOY_DIR/deploy/monitor.sh restart"
+    log "  - 查看状态: sudo $SCRIPT_DIR/monitor.sh status"
+    log "  - 查看日志: sudo $SCRIPT_DIR/monitor.sh logs"
+    log "  - 重启服务: sudo $SCRIPT_DIR/monitor.sh restart"
 }
 
 # 如果脚本被直接执行
