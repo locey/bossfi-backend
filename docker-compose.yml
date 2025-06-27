@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # PostgreSQL 数据库
   postgres:
-    image: postgres:15-alpine
+    image: registry.cn-hangzhou.aliyuncs.com/library/postgres:15-alpine
     container_name: bossfi-postgres
     restart: unless-stopped
     environment:
@@ -23,7 +23,7 @@ services:
 
   # Redis 缓存
   redis:
-    image: redis:7-alpine
+    image: registry.cn-hangzhou.aliyuncs.com/library/redis:7-alpine
     container_name: bossfi-redis
     restart: unless-stopped
     command: redis-server --appendonly yes --requirepass redis123
@@ -39,7 +39,7 @@ services:
 
   # Nginx 反向代理
   nginx:
-    image: nginx:alpine
+    image: registry.cn-hangzhou.aliyuncs.com/library/nginx:alpine
     container_name: bossfi-nginx
     restart: unless-stopped
     ports:
