@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # BossFi 后端应用
+  bossfi-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bossfi-backend:latest
+    container_name: bossfi-backend
+    restart: unless-stopped
+    environment:
+      # 数据库配置
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres123
+      - DB_NAME=bossfi
+      - DB_SSLMODE=disable
+      
+      # Redis配置
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=redis123
+      - REDIS_DB=0
+      
+      # JWT配置
+      - JWT_SECRET=${JWT_SECRET:-bossfi-super-secret-key-2024-production}
+      - JWT_EXPIRE_HOURS=24
+      
+      # 服务器配置
+      - PORT=8080
+      - GIN_MODE=release
+      - LOG_LEVEL=info
+      
+      # 区块链配置
+      - BLOCKCHAIN_RPC_URL=${BLOCKCHAIN_RPC_URL}
+      - CONTRACT_ADDRESS=${CONTRACT_ADDRESS}
+      - PRIVATE_KEY=${PRIVATE_KEY}
+      
+      # 定时任务配置
+      - CRON_ENABLED=true
+      - BLOCKCHAIN_SYNC_INTERVAL=*/5 * * * *
+      
+      # 时区设置
+      - TZ=Asia/Shanghai
+    ports:
+      - "8080:8080"
+    volumes:
+      - app_logs:/app/logs
+    networks:
+      - bossfi-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  app_logs:
+    driver: local
+
+networks:
+  bossfi-network:
+    external: true 
