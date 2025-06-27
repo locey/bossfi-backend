@@ -1,234 +1,305 @@
-# BossFi Backend 部署方案
+# BossFi Backend 部署指南
 
-## 🚀 部署架构
+这是 BossFi 后端项目的 Linux Docker 部署方案，分为基础环境部署和项目部署两个阶段。
 
-### 服务器配置
-- **CPU**: 2核
-- **内存**: 2GB (1975M)
-- **磁盘**: 40GB
-- **同时运行**: 后端 + 前端项目
+## 📋 系统要求
 
-### 资源分配
+- **操作系统**: Ubuntu 18.04+ / Debian 10+
+- **内存**: 至少 2GB RAM
+- **磁盘**: 至少 20GB 可用空间
+- **网络**: 需要访问 GitHub 和 Docker Hub
+
+## 🚀 快速开始
+
+### 1. 基础环境安装
+
+首先在服务器上安装基础环境（Docker、Docker Compose、Nginx等）：
+
+```bash
+# 下载部署脚本
+wget https://raw.githubusercontent.com/locey/bossfi-backend/dev/deploy/setup-environment.sh
+
+# 或者从项目中复制
+# 上传 setup-environment.sh 到服务器
+
+# 设置执行权限
+chmod +x setup-environment.sh
+
+# 运行基础环境安装（需要root权限）
+sudo ./setup-environment.sh
 ```
-总资源：2GB内存，2核CPU
-├── 系统预留：400MB内存
-├── Nginx：50MB内存
-├── PostgreSQL：400MB内存
-├── Redis：100MB内存  
-├── BossFi后端：300MB内存
-└── 前端项目：剩余资源（~750MB）
+
+### 2. 项目部署
+
+基础环境安装完成后，部署 BossFi 项目：
+
+```bash
+# 进入项目目录
+cd /opt/bossfi
+
+# 如果已经有项目代码，进入部署目录
+cd bossfi-backend/deploy
+
+# 设置执行权限
+chmod +x *.sh
+
+# 初始化部署项目
+sudo ./deploy-project.sh init
 ```
 
-## 📁 目录结构
+## 📁 文件结构
 
 ```
 /opt/bossfi/
-├── docker-compose.prod.yml    # Docker Compose 配置
-├── nginx.conf                 # Nginx 配置
-├── env.prod                   # 环境变量
-├── init.sql                   # 数据库初始化脚本
-├── deploy.sh                  # 部署脚本
-├── monitor.sh                 # 监控脚本
-├── logs/                      # 日志目录
-├── ssl/                       # SSL证书目录
-└── backups/                   # 备份目录
-
-/var/www/frontend/             # 前端静态文件目录
+├── bossfi-backend/          # 项目代码目录
+│   ├── deploy/              # 部署配置目录
+│   │   ├── setup-environment.sh    # 基础环境安装脚本
+│   │   ├── deploy-project.sh       # 项目部署脚本
+│   │   ├── monitor.sh              # 监控脚本
+│   │   ├── docker-compose.yml      # Docker编排配置
+│   │   ├── nginx.conf              # Nginx配置
+│   │   └── init.sql                # 数据库初始化脚本
+│   └── .env                 # 环境变量配置
+├── logs/                    # 日志文件目录
+├── backups/                 # 备份文件目录
+├── ssl/                     # SSL证书目录
+└── data/                    # 数据持久化目录
+    ├── postgres/            # PostgreSQL数据
+    └── redis/               # Redis数据
 ```
 
-## 🛠️ 部署步骤
+## 🔧 配置说明
 
-### 1. 服务器环境准备
+### 环境变量配置
 
-```bash
-# 更新系统
-sudo apt update && sudo apt upgrade -y
-
-# 安装Docker
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo usermod -aG docker $USER
-
-# 安装Docker Compose
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-
-# 重新登录以应用Docker组权限
-newgrp docker
-```
-
-### 2. 上传项目文件
+项目使用 `.env` 文件管理环境变量，主要配置项：
 
 ```bash
-# 方法1: 使用Git
-cd /opt
-sudo git clone https://github.com/your-repo/bossfi-backend.git bossfi
-sudo chown -R $USER:$USER /opt/bossfi
+# 数据库配置
+DB_HOST=postgres
+DB_PORT=5432
+DB_USER=bossfi_user
+DB_PASSWORD=your_secure_password
+DB_NAME=bossfi
 
-# 方法2: 使用SCP上传
-scp -r ./bossfi-backend/deploy/* user@your-server:/opt/bossfi/
-```
+# Redis配置
+REDIS_HOST=redis
+REDIS_PORT=6379
 
-### 3. 配置环境变量
+# JWT配置
+JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRE_HOURS=24
 
-```bash
-cd /opt/bossfi
-cp env.prod .env
+# 应用配置
+PORT=8080
+GIN_MODE=release
+LOG_LEVEL=info
 
-# 编辑环境变量
-sudo nano .env
-```
-
-**重要配置项：**
-```bash
-# 修改数据库密码
-DB_PASSWORD=your_secure_password_here
-
-# 修改JWT密钥（至少32字符）
-JWT_SECRET=your_super_secret_jwt_key_32_chars_min
-
-# 配置区块链RPC
+# 区块链配置
 BLOCKCHAIN_RPC_URL=https://mainnet.infura.io/v3/your-project-id
-CONTRACT_ADDRESS=0x你的合约地址
-
-# 私钥（如果需要）
-PRIVATE_KEY=你的私钥
+CONTRACT_ADDRESS=0x1234567890123456789012345678901234567890
 ```
 
-### 4. 执行部署
+### Docker 服务配置
+
+- **PostgreSQL**: 512MB内存限制，数据持久化
+- **Redis**: 128MB内存限制，AOF持久化
+- **BossFi Backend**: 512MB内存限制，健康检查
+- **Nginx**: 64MB内存限制，反向代理和负载均衡
+
+## 📋 部署命令
+
+### 基础环境脚本
 
 ```bash
-# 赋予执行权限
-chmod +x deploy.sh monitor.sh
-
-# 执行部署
-sudo ./deploy.sh prod
+# 安装基础环境
+sudo ./setup-environment.sh
 ```
 
-### 5. 前端项目部署
+### 项目部署脚本
 
 ```bash
-# 创建前端目录
-sudo mkdir -p /var/www/frontend
+# 初始化部署
+sudo ./deploy-project.sh init
 
-# 上传前端构建文件到 /var/www/frontend
-# 例如：
-scp -r ./frontend/dist/* user@your-server:/var/www/frontend/
+# 更新项目
+sudo ./deploy-project.sh update
 
-# 设置权限
-sudo chown -R www-data:www-data /var/www/frontend
-sudo chmod -R 755 /var/www/frontend
-```
+# 重启服务
+sudo ./deploy-project.sh restart
 
-## 🔧 管理命令
+# 停止服务
+sudo ./deploy-project.sh stop
 
-### 监控服务状态
-```bash
-cd /opt/bossfi
-
-# 检查服务状态
-./monitor.sh status
-
-# 检查资源使用
-./monitor.sh resources
+# 查看状态
+sudo ./deploy-project.sh status
 
 # 查看日志
-./monitor.sh logs
-
-# 查看特定服务日志
-./monitor.sh logs bossfi-backend
-```
-
-### 常用Docker命令
-```bash
-cd /opt/bossfi
-
-# 查看容器状态
-docker-compose -f docker-compose.prod.yml ps
-
-# 重启所有服务
-docker-compose -f docker-compose.prod.yml restart
-
-# 重启特定服务
-docker-compose -f docker-compose.prod.yml restart bossfi-backend
-
-# 查看日志
-docker-compose -f docker-compose.prod.yml logs -f bossfi-backend
-
-# 进入容器
-docker exec -it bossfi-backend /bin/sh
-docker exec -it bossfi-postgres psql -U bossfi_user -d bossfi
-```
-
-### 数据库管理
-```bash
-# 连接数据库
-docker exec -it bossfi-postgres psql -U bossfi_user -d bossfi
-
-# 备份数据库
-./monitor.sh backup
+sudo ./deploy-project.sh logs [backend|postgres|redis|nginx]
 
 # 手动备份
-docker exec bossfi-postgres pg_dump -U bossfi_user bossfi > backup.sql
-
-# 恢复数据库
-docker exec -i bossfi-postgres psql -U bossfi_user -d bossfi < backup.sql
+sudo ./deploy-project.sh backup
 ```
 
-## 🔍 访问地址
+### 监控脚本
+
+```bash
+# 查看服务状态
+./monitor.sh status
+
+# 完整健康检查
+./monitor.sh health
+
+# 查看实时日志
+./monitor.sh logs [all|backend|postgres|redis|nginx]
+
+# 重启特定服务
+./monitor.sh restart [all|backend|postgres|redis|nginx]
+
+# 查看资源使用
+./monitor.sh resource
+
+# 检查网络连接
+./monitor.sh network
+
+# 显示性能统计
+./monitor.sh perf
+```
+
+## 🔍 常用操作
+
+### 查看服务状态
+
+```bash
+# 查看所有容器状态
+docker ps
+
+# 查看服务状态
+./monitor.sh status
+
+# 查看资源使用
+docker stats
+```
+
+### 查看日志
+
+```bash
+# 查看所有服务日志
+./monitor.sh logs all
+
+# 查看后端服务日志
+./monitor.sh logs backend
+
+# 查看Nginx访问日志
+tail -f /opt/bossfi/logs/access.log
+
+# 查看错误日志
+tail -f /opt/bossfi/logs/error.log
+```
+
+### 备份和恢复
+
+```bash
+# 手动备份
+sudo ./deploy-project.sh backup
+
+# 查看备份文件
+ls -la /opt/bossfi/backups/
+
+# 恢复数据库（示例）
+docker exec -i bossfi-postgres psql -U bossfi_user -d bossfi < /opt/bossfi/backups/db_backup_20241201_120000.sql
+```
+
+## 🌐 访问地址
 
 部署完成后，可以通过以下地址访问：
 
-- **前端**: `http://your-server-ip`
-- **API**: `http://your-server-ip/api`
+- **API接口**: `http://your-server-ip/api/`
 - **健康检查**: `http://your-server-ip/health`
 - **API文档**: `http://your-server-ip/swagger/index.html`
 
-## 📊 性能优化
+### API接口示例
 
-### 1. 数据库优化
-```sql
--- 在PostgreSQL中执行
--- 优化配置（根据2GB内存）
-ALTER SYSTEM SET shared_buffers = '128MB';
-ALTER SYSTEM SET effective_cache_size = '1GB';
-ALTER SYSTEM SET maintenance_work_mem = '64MB';
-ALTER SYSTEM SET checkpoint_completion_target = 0.9;
-ALTER SYSTEM SET wal_buffers = '16MB';
-ALTER SYSTEM SET default_statistics_target = 100;
-
-SELECT pg_reload_conf();
-```
-
-### 2. Redis优化
-Redis配置已在docker-compose.yml中优化：
-- 最大内存：80MB
-- 内存策略：allkeys-lru
-- 持久化：AOF
-
-### 3. Nginx优化
-- 启用Gzip压缩
-- 静态文件缓存
-- 连接池
-- 限流保护
-
-## 🔒 安全配置
-
-### 1. 防火墙设置
 ```bash
-# 安装UFW
-sudo apt install ufw
+# 健康检查
+curl http://your-server-ip/health
 
-# 配置防火墙
-sudo ufw default deny incoming
-sudo ufw default allow outgoing
-sudo ufw allow ssh
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw enable
+# 获取签名消息
+curl -X POST http://your-server-ip/api/auth/nonce \
+  -H "Content-Type: application/json" \
+  -d '{"wallet_address": "0x1234567890123456789012345678901234567890"}'
+
+# 钱包登录
+curl -X POST http://your-server-ip/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "wallet_address": "0x1234567890123456789012345678901234567890",
+    "signature": "0x...",
+    "message": "..."
+  }'
 ```
 
-### 2. SSL证书（可选）
+## 🛠️ 故障排查
+
+### 常见问题
+
+1. **容器启动失败**
+   ```bash
+   # 查看容器日志
+   docker logs bossfi-backend
+   
+   # 检查配置
+   docker-compose config
+   ```
+
+2. **数据库连接失败**
+   ```bash
+   # 检查数据库状态
+   docker exec bossfi-postgres pg_isready -U bossfi_user
+   
+   # 查看数据库日志
+   ./monitor.sh logs postgres
+   ```
+
+3. **内存不足**
+   ```bash
+   # 查看内存使用
+   free -h
+   docker stats
+   
+   # 调整容器内存限制
+   vim docker-compose.yml
+   ```
+
+4. **端口冲突**
+   ```bash
+   # 检查端口占用
+   netstat -tlnp | grep :80
+   netstat -tlnp | grep :8080
+   ```
+
+### 日志位置
+
+- **应用日志**: `/opt/bossfi/logs/`
+- **Nginx日志**: `/opt/bossfi/logs/access.log`, `/opt/bossfi/logs/error.log`
+- **Docker日志**: `docker logs <container_name>`
+
+## 🔐 安全配置
+
+### 防火墙配置
+
+```bash
+# 查看防火墙状态
+sudo ufw status
+
+# 允许特定IP访问
+sudo ufw allow from YOUR_IP to any port 22
+sudo ufw allow from YOUR_IP to any port 80
+sudo ufw allow from YOUR_IP to any port 443
+```
+
+### SSL证书配置
+
 ```bash
 # 安装Certbot
 sudo apt install certbot python3-certbot-nginx
@@ -238,133 +309,51 @@ sudo certbot --nginx -d your-domain.com
 
 # 自动续期
 sudo crontab -e
-# 添加：0 12 * * * /usr/bin/certbot renew --quiet
+# 添加: 0 12 * * * /usr/bin/certbot renew --quiet
 ```
 
-### 3. 定期更新
-```bash
-# 创建更新脚本
-cat > /opt/bossfi/update.sh << 'EOF'
-#!/bin/bash
-cd /opt/bossfi
-./monitor.sh backup
-docker-compose -f docker-compose.prod.yml pull
-docker-compose -f docker-compose.prod.yml up -d
-docker system prune -f
-EOF
-
-chmod +x /opt/bossfi/update.sh
-
-# 添加定时任务（每周日凌晨3点更新）
-sudo crontab -e
-# 添加：0 3 * * 0 /opt/bossfi/update.sh
-```
-
-## 🚨 故障排除
-
-### 常见问题
-
-1. **容器启动失败**
-   ```bash
-   # 查看详细错误
-   docker-compose -f docker-compose.prod.yml logs
-   
-   # 检查配置文件
-   docker-compose -f docker-compose.prod.yml config
-   ```
-
-2. **数据库连接失败**
-   ```bash
-   # 检查数据库状态
-   docker exec bossfi-postgres pg_isready -U bossfi_user -d bossfi
-   
-   # 查看数据库日志
-   docker-compose -f docker-compose.prod.yml logs postgres
-   ```
-
-3. **内存不足**
-   ```bash
-   # 查看内存使用
-   free -h
-   docker stats
-   
-   # 清理Docker缓存
-   docker system prune -a
-   ```
-
-4. **磁盘空间不足**
-   ```bash
-   # 查看磁盘使用
-   df -h
-   du -sh /opt/bossfi/* | sort -h
-   
-   # 清理日志
-   docker-compose -f docker-compose.prod.yml logs --tail=0
-   journalctl --vacuum-time=7d
-   ```
-
-### 紧急恢复
-
-```bash
-# 快速重启所有服务
-cd /opt/bossfi
-docker-compose -f docker-compose.prod.yml down
-docker-compose -f docker-compose.prod.yml up -d
-
-# 恢复数据库备份
-docker exec -i bossfi-postgres psql -U bossfi_user -d bossfi < /opt/bossfi/backups/latest_backup.sql
-```
-
-## 📈 监控告警
-
-### 设置监控脚本
-```bash
-# 创建监控检查脚本
-cat > /opt/bossfi/health_check.sh << 'EOF'
-#!/bin/bash
-cd /opt/bossfi
-
-# 检查服务健康状态
-if ! curl -f -s http://localhost/health >/dev/null; then
-    echo "$(date): BossFi Backend服务异常" >> /var/log/bossfi-alert.log
-    # 可以在这里添加邮件或短信通知
-fi
-
-# 检查内存使用
-MEMORY_USAGE=$(free | awk 'NR==2{printf "%.0f", $3*100/$2}')
-if [ $MEMORY_USAGE -gt 85 ]; then
-    echo "$(date): 内存使用率过高: ${MEMORY_USAGE}%" >> /var/log/bossfi-alert.log
-fi
-
-# 检查磁盘使用
-DISK_USAGE=$(df / | awk 'NR==2{print $5}' | cut -d'%' -f1)
-if [ $DISK_USAGE -gt 85 ]; then
-    echo "$(date): 磁盘使用率过高: ${DISK_USAGE}%" >> /var/log/bossfi-alert.log
-fi
-EOF
-
-chmod +x /opt/bossfi/health_check.sh
-
-# 添加定时检查（每5分钟）
-sudo crontab -e
-# 添加：*/5 * * * * /opt/bossfi/health_check.sh
-```
-
-## 📝 维护计划
+## 📊 监控和维护
 
 ### 定期维护任务
 
-1. **每天**: 自动备份数据库
-2. **每周**: 检查日志，清理临时文件
-3. **每月**: 更新系统包，检查安全补丁
-4. **每季度**: 性能调优，容量规划
+```bash
+# 清理Docker资源
+docker system prune -f
 
-### 升级步骤
+# 清理旧日志
+find /opt/bossfi/logs -name "*.log" -mtime +30 -delete
 
-1. 备份数据
-2. 测试新版本
-3. 滚动升级
-4. 验证功能
-5. 监控运行状态
+# 清理旧备份
+find /opt/bossfi/backups -mtime +7 -delete
 
-这个部署方案专门为您的2GB内存服务器优化，确保后端和前端项目都能稳定运行。 
+# 更新系统
+sudo apt update && sudo apt upgrade -y
+```
+
+### 性能监控
+
+```bash
+# 系统资源监控
+./monitor.sh perf
+
+# 实时监控
+htop
+iotop
+nethogs
+```
+
+## 🆘 支持
+
+如果遇到问题，请：
+
+1. 查看日志文件排查问题
+2. 运行健康检查：`./monitor.sh health`
+3. 检查服务状态：`./monitor.sh status`
+4. 查看项目文档和GitHub Issues
+
+## 📝 更新日志
+
+- **v1.0.0**: 初始版本，包含基础部署功能
+- 支持 Docker 容器化部署
+- 包含完整的监控和备份功能
+- 支持一键部署和更新 
