@@ -5,10 +5,13 @@
 
 set -e
 
-# 获取环境参数
+# 获取脚本所在目录和项目根目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 ENVIRONMENT=${1:-prod}
 PROJECT_NAME="bossfi"
-DEPLOY_DIR="/opt/bossfi"
+# 部署目录就是项目根目录
+DEPLOY_DIR="$PROJECT_ROOT"
 BACKUP_DIR="/opt/bossfi/backups"
 
 # 颜色定义
@@ -65,10 +68,9 @@ check_dependencies() {
 create_directories() {
     log "创建目录结构..."
     
-    mkdir -p $DEPLOY_DIR
     mkdir -p $BACKUP_DIR
     mkdir -p $DEPLOY_DIR/logs
-    mkdir -p $DEPLOY_DIR/ssl
+    mkdir -p $DEPLOY_DIR/deploy/ssl
     mkdir -p /var/www/frontend
     
     log "目录结构创建完成"
@@ -88,7 +90,7 @@ backup_data() {
         fi
         
         # 备份配置文件
-        tar -czf $BACKUP_FILE -C $DEPLOY_DIR . 2>/dev/null || true
+        tar -czf $BACKUP_FILE -C $DEPLOY_DIR/deploy . 2>/dev/null || true
         
         log "数据备份完成: $BACKUP_FILE"
     fi
@@ -98,7 +100,7 @@ backup_data() {
 stop_services() {
     log "停止现有服务..."
     
-    cd $DEPLOY_DIR
+    cd $DEPLOY_DIR/deploy
     if [ -f "docker-compose.prod.yml" ]; then
         docker-compose -f docker-compose.prod.yml down || true
     fi
@@ -113,14 +115,16 @@ stop_services() {
 deploy_new_version() {
     log "部署新版本..."
     
-    # 复制部署文件
-    cp -r ./deploy/* $DEPLOY_DIR/
+    # 检查部署文件是否存在
+    if [ ! -f "$DEPLOY_DIR/deploy/docker-compose.prod.yml" ]; then
+        error "Docker Compose 文件不存在: $DEPLOY_DIR/deploy/docker-compose.prod.yml"
+    fi
     
     # 设置权限
-    chmod +x $DEPLOY_DIR/*.sh
-    chmod 600 $DEPLOY_DIR/env.prod
+    chmod +x $DEPLOY_DIR/deploy/*.sh
+    chmod 600 $DEPLOY_DIR/deploy/env.prod
     
-    cd $DEPLOY_DIR
+    cd $DEPLOY_DIR/deploy
     
     # 构建并启动服务
     log "构建Docker镜像..."
@@ -197,6 +201,9 @@ monitor_resources() {
 # 主函数
 main() {
     log "开始部署 BossFi Backend ($ENVIRONMENT 环境)"
+    log "项目根目录: $PROJECT_ROOT"
+    log "部署目录: $DEPLOY_DIR"
+    log "脚本目录: $SCRIPT_DIR"
     
     check_root
     check_dependencies
@@ -206,17 +213,17 @@ main() {
     deploy_new_version
     monitor_resources
     
-    log "部署完成！"
-    log "访问地址:"
+    log "✅ 部署完成！"
+    log "🌐 访问地址:"
     log "  - 前端: http://your-server-ip"
     log "  - API: http://your-server-ip/api"
     log "  - 健康检查: http://your-server-ip/health"
     log "  - API文档: http://your-server-ip/swagger/index.html"
     
-    log "监控命令:"
-    log "  - 查看日志: docker-compose -f $DEPLOY_DIR/docker-compose.prod.yml logs -f"
-    log "  - 查看状态: docker ps"
-    log "  - 重启服务: docker-compose -f $DEPLOY_DIR/docker-compose.prod.yml restart"
+    log "📊 监控命令:"
+    log "  - 查看状态: sudo $DEPLOY_DIR/deploy/monitor.sh status"
+    log "  - 查看日志: sudo $DEPLOY_DIR/deploy/monitor.sh logs"
+    log "  - 重启服务: sudo $DEPLOY_DIR/deploy/monitor.sh restart"
 }
 
 # 如果脚本被直接执行

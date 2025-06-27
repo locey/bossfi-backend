@@ -5,10 +5,12 @@
 
 set -e
 
-# 配置变量
-DEPLOY_DIR="/opt/bossfi"
+# 获取脚本所在目录和项目根目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+DEPLOY_DIR="$SCRIPT_DIR"
 COMPOSE_FILE="$DEPLOY_DIR/docker-compose.prod.yml"
-LOG_DIR="$DEPLOY_DIR/logs"
+LOG_DIR="$PROJECT_ROOT/logs"
 BACKUP_DIR="/opt/bossfi/backups"
 
 # 颜色定义
@@ -198,55 +200,71 @@ backup_data() {
     # 备份Redis数据
     log "备份Redis数据..."
     if docker exec bossfi-redis redis-cli SAVE >/dev/null 2>&1; then
-        docker cp bossfi-redis:/data/dump.rdb $BACKUP_DIR/redis_backup_$timestamp.rdb
-        log "Redis备份完成: $BACKUP_DIR/redis_backup_$timestamp.rdb"
+        if docker cp bossfi-redis:/data/dump.rdb $BACKUP_DIR/redis_backup_$timestamp.rdb; then
+            log "Redis备份完成: $BACKUP_DIR/redis_backup_$timestamp.rdb"
+        else
+            warn "Redis数据文件复制失败"
+        fi
     else
         warn "Redis备份失败"
     fi
     
+    # 备份配置文件
+    log "备份配置文件..."
+    tar -czf $BACKUP_DIR/config_backup_$timestamp.tar.gz -C $DEPLOY_DIR . 2>/dev/null
+    log "配置备份完成: $BACKUP_DIR/config_backup_$timestamp.tar.gz"
+    
     # 清理旧备份（保留最近7天）
-    log "清理旧备份文件..."
     find $BACKUP_DIR -name "*.sql" -mtime +7 -delete 2>/dev/null || true
     find $BACKUP_DIR -name "*.rdb" -mtime +7 -delete 2>/dev/null || true
+    find $BACKUP_DIR -name "*.tar.gz" -mtime +7 -delete 2>/dev/null || true
     
-    log "备份完成"
+    log "备份完成，旧备份已清理"
 }
 
-# 显示帮助信息
+# 显示使用帮助
 show_help() {
-    echo -e "${BLUE}BossFi Backend 监控脚本${NC}"
+    echo "BossFi Backend 监控脚本"
     echo ""
     echo "使用方法:"
-    echo "  $0 status              - 检查服务状态"
-    echo "  $0 resources           - 检查资源使用情况" 
-    echo "  $0 logs [service]      - 查看服务日志"
-    echo "  $0 restart [service]   - 重启服务"
-    echo "  $0 backup              - 备份数据"
-    echo "  $0 help                - 显示帮助信息"
+    echo "  sudo ./monitor.sh [命令] [参数]"
     echo ""
-    echo "服务名称: bossfi-backend, postgres, redis, nginx"
+    echo "可用命令:"
+    echo "  status      显示服务状态和健康检查"
+    echo "  resources   显示系统资源使用情况"
+    echo "  logs        查看服务日志"
+    echo "  restart     重启服务"
+    echo "  backup      备份数据"
     echo ""
     echo "示例:"
-    echo "  $0 status              # 检查所有服务状态"
-    echo "  $0 logs bossfi-backend # 查看后端日志"
-    echo "  $0 restart postgres    # 重启数据库"
+    echo "  sudo ./monitor.sh status"
+    echo "  sudo ./monitor.sh logs bossfi-backend"
+    echo "  sudo ./monitor.sh restart postgres"
+    echo "  sudo ./monitor.sh backup"
+    echo ""
+    echo "路径信息:"
+    echo "  项目根目录: $PROJECT_ROOT"
+    echo "  部署目录: $DEPLOY_DIR"
+    echo "  备份目录: $BACKUP_DIR"
 }
 
 # 主函数
 main() {
-    case "${1:-status}" in
+    local command=${1:-status}
+    local service=${2:-""}
+    
+    case $command in
         "status")
             check_status
-            check_resources
             ;;
         "resources")
             check_resources
             ;;
         "logs")
-            show_logs $2
+            show_logs $service
             ;;
         "restart")
-            restart_services $2
+            restart_services $service
             ;;
         "backup")
             backup_data
@@ -255,14 +273,12 @@ main() {
             show_help
             ;;
         *)
-            error "未知命令: $1"
-            show_help
+            echo "未知命令: $command"
+            echo "使用 './monitor.sh help' 查看帮助"
             exit 1
             ;;
     esac
 }
 
-# 如果脚本被直接执行
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main "$@"
-fi 
+# 执行主函数
+main "$@" 
