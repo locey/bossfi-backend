@@ -122,20 +122,20 @@ deploy_new_version() {
     
     # 设置权限
     chmod +x $SCRIPT_DIR/*.sh
-    if [ -f "$SCRIPT_DIR/env.prod" ]; then
-        chmod 600 $SCRIPT_DIR/env.prod
+    if [ -f "$PROJECT_ROOT/env.prod" ]; then
+        chmod 600 $PROJECT_ROOT/env.prod
     fi
     
     cd $SCRIPT_DIR
     
     # 加载环境变量
-    if [ -f "$SCRIPT_DIR/env.prod" ]; then
-        log "加载环境变量文件: $SCRIPT_DIR/env.prod"
+    if [ -f "$PROJECT_ROOT/env.prod" ]; then
+        log "加载环境变量文件: $PROJECT_ROOT/env.prod"
         set -a  # 自动导出变量
-        source "$SCRIPT_DIR/env.prod"
+        source "$PROJECT_ROOT/env.prod"
         set +a  # 关闭自动导出
     else
-        warn "环境变量文件不存在: $SCRIPT_DIR/env.prod"
+        warn "环境变量文件不存在: $PROJECT_ROOT/env.prod"
     fi
     
     # 构建并启动服务

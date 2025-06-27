@@ -16,7 +16,7 @@ echo "=== 检查关键文件是否存在 ==="
 # 检查部署相关文件
 files=(
     "$SCRIPT_DIR/docker-compose.prod.yml"
-    "$SCRIPT_DIR/env.prod"
+    "$PROJECT_ROOT/env.prod"
     "$SCRIPT_DIR/nginx.conf"
     "$SCRIPT_DIR/deploy.sh"
     "$SCRIPT_DIR/monitor.sh"
