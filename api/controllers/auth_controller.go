@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// AuthController 认证控制器
 type AuthController struct {
 	userService *services.UserService
 }
