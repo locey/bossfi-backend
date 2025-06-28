@@ -1,6 +1,9 @@
 # 构建阶段
 FROM golang:1.21-alpine AS builder
 
+# 使用国内alpine源加速
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
 # 设置工作目录
 WORKDIR /app
 
@@ -9,6 +12,9 @@ RUN apk add --no-cache git
 
 # 复制 go mod 文件
 COPY go.mod go.sum ./
+
+# 使用国内Go代理加速
+ENV GOPROXY=https://goproxy.cn,direct
 
 # 下载依赖
 RUN go mod download
@@ -21,6 +27,9 @@ RUN go build -o /app/bossfi-server main.go
 
 # 运行阶段
 FROM alpine:latest
+
+# 使用国内alpine源加速
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 # 安装必要的工具
 RUN apk --no-cache add ca-certificates tzdata
