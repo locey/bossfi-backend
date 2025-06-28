@@ -47,9 +47,6 @@ WORKDIR /root/
 # 从构建阶段复制二进制文件
 COPY --from=builder /app/bossfi-server .
 
-# 复制配置文件
-COPY --from=builder /app/001_init_postgres.sql .
-
 # 更改文件所有者
 RUN chown -R appuser:appgroup /root/
 
