@@ -19,8 +19,14 @@ ENV GOPROXY=https://goproxy.cn,direct
 # 下载依赖
 RUN go mod download
 
+# 安装 swag
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+
 # 复制源代码
 COPY . .
+
+# 生成 Swagger 文档
+RUN swag init --dir ./api --output ./docs --generalInfo main.go
 
 WORKDIR /app/api
 RUN go build -o /app/bossfi-server main.go
