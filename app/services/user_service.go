@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"bossfi-backend/api/models"
 	"bossfi-backend/db/database"
 	"bossfi-backend/db/redis"
+	"bossfi-backend/models"
 	"bossfi-backend/utils"
 
 	"github.com/google/uuid"

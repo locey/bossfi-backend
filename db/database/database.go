@@ -3,8 +3,8 @@ package database
 import (
 	"fmt"
 
-	"bossfi-backend/api/models"
 	"bossfi-backend/config"
+	"bossfi-backend/models"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"

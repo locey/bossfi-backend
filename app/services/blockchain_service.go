@@ -5,9 +5,9 @@ import (
 	"math/big"
 	"time"
 
-	"bossfi-backend/api/models"
 	"bossfi-backend/config"
 	"bossfi-backend/db/database"
+	"bossfi-backend/models"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"

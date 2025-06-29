@@ -1,7 +1,7 @@
 package cron
 
 import (
-	"bossfi-backend/api/services"
+	"bossfi-backend/app/services"
 	"bossfi-backend/config"
 
 	"github.com/robfig/cron/v3"

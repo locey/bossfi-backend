@@ -75,7 +75,7 @@ func main() {
 
 	// 创建 HTTP 服务器
 	srv := &http.Server{
-		Addr:    ":" + config.AppConfig.Server.Port,
+		Addr:    "0.0.0.0:" + config.AppConfig.Server.Port,
 		Handler: router,
 	}
 

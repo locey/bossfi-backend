@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"bossfi-backend/api/models"
 	"bossfi-backend/api/routes"
 	"bossfi-backend/config"
 	"bossfi-backend/db/database"
 	"bossfi-backend/db/redis"
+	"bossfi-backend/models"
 	"bossfi-backend/utils"
 
 	"github.com/gin-gonic/gin"

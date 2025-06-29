@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"bossfi-backend/api/models"
 	"bossfi-backend/config"
 	"bossfi-backend/db/database"
 	"bossfi-backend/db/redis"
+	"bossfi-backend/models"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

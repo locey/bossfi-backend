@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 
-	"bossfi-backend/api/services"
+	"bossfi-backend/app/services"
 	"bossfi-backend/middleware"
 
 	"github.com/gin-gonic/gin"
