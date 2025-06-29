@@ -7,7 +7,7 @@
 // @contact.email support@bossfi.com
 // @license.name MIT
 // @license.url https://opensource.org/licenses/MIT
-// @host localhost:8080
+// @host ${SWAGGER_URL}
 // @BasePath /api/v1
 // @schemes http https
 // @securityDefinitions.apikey Bearer
