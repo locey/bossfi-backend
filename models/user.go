@@ -2,13 +2,10 @@ package models
 
 import (
 	"time"
-
-	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type User struct {
-	ID                uuid.UUID  `json:"id" gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
+	ID                uint       `json:"id" gorm:"primarykey"`
 	WalletAddress     string     `json:"wallet_address" gorm:"type:varchar(42);unique;not null"`
 	Username          *string    `json:"username" gorm:"type:varchar(50);unique"`
 	Email             *string    `json:"email" gorm:"type:varchar(255);unique"`
@@ -21,13 +18,6 @@ type User struct {
 	LastLoginAt       *time.Time `json:"last_login_at" gorm:"type:timestamptz"`
 	CreatedAt         time.Time  `json:"created_at" gorm:"type:timestamptz;default:CURRENT_TIMESTAMP"`
 	UpdatedAt         time.Time  `json:"updated_at" gorm:"type:timestamptz;default:CURRENT_TIMESTAMP"`
-}
-
-func (u *User) BeforeCreate(tx *gorm.DB) error {
-	if u.ID == uuid.Nil {
-		u.ID = uuid.New()
-	}
-	return nil
 }
 
 func (u *User) TableName() string {

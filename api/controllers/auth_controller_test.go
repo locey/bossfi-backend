@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -17,7 +18,6 @@ import (
 	"bossfi-backend/utils"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -200,7 +200,6 @@ func (suite *AuthControllerTestSuite) TestLogin() {
 func (suite *AuthControllerTestSuite) TestGetProfile() {
 	// 创建测试用户
 	testUser := models.User{
-		ID:            uuid.New(),
 		WalletAddress: "0x1234567890123456789012345678901234567890",
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
@@ -209,7 +208,7 @@ func (suite *AuthControllerTestSuite) TestGetProfile() {
 	require.NoError(suite.T(), err)
 
 	// 生成测试 token
-	token, err := utils.GenerateJWT(testUser.ID.String(), testUser.WalletAddress)
+	token, err := utils.GenerateJWT(strconv.FormatUint(uint64(testUser.ID), 10), testUser.WalletAddress)
 	require.NoError(suite.T(), err)
 
 	tests := []struct {
@@ -263,7 +262,7 @@ func (suite *AuthControllerTestSuite) TestGetProfile() {
 				assert.True(t, exists)
 
 				userMap := user.(map[string]interface{})
-				assert.Equal(t, testUser.ID.String(), userMap["id"])
+				assert.Equal(t, testUser.ID, userMap["id"])
 				assert.Equal(t, testUser.WalletAddress, userMap["wallet_address"])
 			}
 		})
@@ -273,7 +272,6 @@ func (suite *AuthControllerTestSuite) TestGetProfile() {
 func (suite *AuthControllerTestSuite) TestLogout() {
 	// 创建测试用户
 	testUser := models.User{
-		ID:            uuid.New(),
 		WalletAddress: "0x1234567890123456789012345678901234567890",
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
@@ -282,11 +280,11 @@ func (suite *AuthControllerTestSuite) TestLogout() {
 	require.NoError(suite.T(), err)
 
 	// 生成测试 token
-	token, err := utils.GenerateJWT(testUser.ID.String(), testUser.WalletAddress)
+	token, err := utils.GenerateJWT(strconv.FormatUint(uint64(testUser.ID), 10), testUser.WalletAddress)
 	require.NoError(suite.T(), err)
 
 	// 设置用户会话
-	err = redis.SetUserSession(testUser.ID.String(), token)
+	err = redis.SetUserSession(strconv.FormatUint(uint64(testUser.ID), 10), token)
 	require.NoError(suite.T(), err)
 
 	tests := []struct {

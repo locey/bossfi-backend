@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	"bossfi-backend/models"
 	"bossfi-backend/utils"
 
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -86,14 +86,14 @@ func (s *UserService) VerifyAndLogin(walletAddress, signature, message string) (
 	}
 
 	// 生成 JWT token
-	token, err := utils.GenerateJWT(user.ID.String(), user.WalletAddress)
+	token, err := utils.GenerateJWT(strconv.FormatUint(uint64(user.ID), 10), user.WalletAddress)
 	if err != nil {
 		logrus.Errorf("Failed to generate JWT: %v", err)
 		return nil, "", errors.New("failed to generate token")
 	}
 
 	// 存储用户会话到 Redis
-	if err := redis.SetUserSession(user.ID.String(), token); err != nil {
+	if err := redis.SetUserSession(strconv.FormatUint(uint64(user.ID), 10), token); err != nil {
 		logrus.Warnf("Failed to store user session: %v", err)
 	}
 
@@ -117,7 +117,6 @@ func (s *UserService) findOrCreateUser(walletAddress string) (*models.User, erro
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		// 创建新用户
 		newUser := models.User{
-			ID:            uuid.New(),
 			WalletAddress: walletAddress,
 			CreatedAt:     time.Now(),
 			UpdatedAt:     time.Now(),
@@ -137,12 +136,12 @@ func (s *UserService) findOrCreateUser(walletAddress string) (*models.User, erro
 func (s *UserService) GetUserByID(userID string) (*models.User, error) {
 	var user models.User
 
-	id, err := uuid.Parse(userID)
+	id, err := strconv.ParseUint(userID, 10, 32)
 	if err != nil {
 		return nil, errors.New("invalid user ID format")
 	}
 
-	err = database.DB.Where("id = ?", id).First(&user).Error
+	err = database.DB.Where("id = ?", uint(id)).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("user not found")

@@ -12,7 +12,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 )
 
 // GenerateNonce 生成随机 nonce
@@ -77,6 +76,12 @@ type JWTClaims struct {
 
 // GenerateJWT 生成 JWT token
 func GenerateJWT(userID, walletAddress string) (string, error) {
+	// 生成随机JWT ID
+	jwtID, err := GenerateNonce()
+	if err != nil {
+		jwtID = fmt.Sprintf("%d", time.Now().UnixNano())
+	}
+
 	claims := JWTClaims{
 		UserID:        userID,
 		WalletAddress: walletAddress,
@@ -86,7 +91,7 @@ func GenerateJWT(userID, walletAddress string) (string, error) {
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			Issuer:    "bossfi-backend",
 			Subject:   userID,
-			ID:        uuid.New().String(),
+			ID:        jwtID,
 		},
 	}
 

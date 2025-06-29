@@ -2,9 +2,12 @@ package middleware
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -12,6 +15,16 @@ const (
 	TraceIDHeader = "X-Trace-ID"
 	TraceIDKey    = "trace_id"
 )
+
+// generateTraceID 生成随机的TraceID
+func generateTraceID() string {
+	bytes := make([]byte, 16)
+	if _, err := rand.Read(bytes); err != nil {
+		// 如果随机生成失败，使用时间戳作为备选
+		return fmt.Sprintf("trace_%d", time.Now().UnixNano())
+	}
+	return hex.EncodeToString(bytes)
+}
 
 // TraceIDMiddleware 提取或生成 TraceID，并设置到请求上下文中
 func TraceIDMiddleware() gin.HandlerFunc {
@@ -21,7 +34,7 @@ func TraceIDMiddleware() gin.HandlerFunc {
 
 		// 如果没有提供 TraceID，则生成一个新的
 		if traceID == "" {
-			traceID = uuid.New().String()
+			traceID = generateTraceID()
 		}
 
 		// 设置到 Gin 上下文
