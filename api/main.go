@@ -7,7 +7,6 @@
 // @contact.email support@bossfi.com
 // @license.name MIT
 // @license.url https://opensource.org/licenses/MIT
-// @host ${SWAGGER_URL}
 // @BasePath /api/v1
 // @schemes http https
 // @securityDefinitions.apikey Bearer
@@ -22,6 +21,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -32,7 +32,7 @@ import (
 	cron "bossfi-backend/schedule"
 
 	// 导入docs包以初始化swagger
-	_ "bossfi-backend/docs"
+	"bossfi-backend/docs"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -47,6 +47,15 @@ func main() {
 	// 初始化配置
 	config.Init()
 	logrus.Info("Configuration loaded successfully")
+
+	// 设置 Swagger 信息
+	swaggerURL := os.Getenv("SWAGGER_URL")
+	if swaggerURL == "" {
+		swaggerURL = "http://localhost:" + config.AppConfig.Server.Port
+	}
+	// 移除可能的协议前缀
+	swaggerURL = strings.TrimPrefix(strings.TrimPrefix(swaggerURL, "http://"), "https://")
+	docs.SwaggerInfo.Host = swaggerURL
 
 	// 生成 Swagger 文档
 	generateSwaggerDocs()
