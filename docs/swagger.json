@@ -19,9 +19,447 @@
         },
         "version": "1.0.0"
     },
-    "host": "localhost:8080",
     "basePath": "/api/v1",
     "paths": {
+        "/articles": {
+            "get": {
+                "description": "分页获取文章列表，支持排序和筛选",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "文章"
+                ],
+                "summary": "获取文章列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "created_at",
+                            "like_count",
+                            "view_count"
+                        ],
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "排序方向",
+                        "name": "sort_order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "user_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "文章列表",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ArticleListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "创建一篇新文章",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "文章"
+                ],
+                "summary": "创建文章",
+                "parameters": [
+                    {
+                        "description": "创建文章信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateArticleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ArticleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/articles/{id}": {
+            "get": {
+                "description": "根据文章ID获取文章详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "文章"
+                ],
+                "summary": "获取文章详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "文章ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "文章信息",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ArticleResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "文章不存在",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "更新文章内容",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "文章"
+                ],
+                "summary": "更新文章",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "文章ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新文章信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateArticleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ArticleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "文章不存在",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "删除文章（逻辑删除）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "文章"
+                ],
+                "summary": "删除文章",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "文章ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "文章不存在",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/articles/{id}/like": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "给文章点赞",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "文章"
+                ],
+                "summary": "点赞文章",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "文章ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "点赞成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "已经点赞",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "文章不存在",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/articles/{id}/unlike": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "取消文章点赞",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "文章"
+                ],
+                "summary": "取消点赞文章",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "文章ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "取消点赞成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "未点赞",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "使用钱包签名进行登录验证，验证成功后返回JWT令牌",
@@ -218,6 +656,237 @@
                 }
             }
         },
+        "/auth/test-token": {
+            "post": {
+                "description": "直接获取JWT token用于API测试，仅限开发环境使用",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "获取测试用token",
+                "parameters": [
+                    {
+                        "description": "钱包地址信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.TestTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.TestTokenResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/comments": {
+            "get": {
+                "description": "分页获取文章评论列表，支持按父评论筛选",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论"
+                ],
+                "summary": "获取评论列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "文章ID",
+                        "name": "article_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "父评论ID，用于获取回复",
+                        "name": "parent_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "评论列表",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CommentListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "为文章创建新评论，支持回复其他评论",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论"
+                ],
+                "summary": "创建评论",
+                "parameters": [
+                    {
+                        "description": "创建评论信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateCommentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CommentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/comments/{id}/like": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "为指定评论点赞或取消点赞",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论"
+                ],
+                "summary": "点赞评论",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "评论ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "检查服务器是否正常运行，返回系统状态信息和TraceID",
@@ -298,6 +967,303 @@
                     "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                 },
                 "user": {}
+            }
+        },
+        "controllers.TestTokenRequest": {
+            "type": "object",
+            "required": [
+                "wallet_address"
+            ],
+            "properties": {
+                "wallet_address": {
+                    "type": "string",
+                    "example": "0x1234567890123456789012345678901234567890"
+                }
+            }
+        },
+        "controllers.TestTokenResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "user": {}
+            }
+        },
+        "dto.ArticleListResponse": {
+            "type": "object",
+            "properties": {
+                "articles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ArticleResponse"
+                    }
+                },
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "page_size": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 100
+                }
+            }
+        },
+        "dto.ArticleResponse": {
+            "type": "object",
+            "properties": {
+                "comment_count": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "content": {
+                    "type": "string",
+                    "example": "文章内容"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2025-01-01T00:00:00Z"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "['https://example.com/image.jpg']"
+                    ]
+                },
+                "is_deleted": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "like_count": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "title": {
+                    "type": "string",
+                    "example": "文章标题"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2025-01-01T00:00:00Z"
+                },
+                "user": {
+                    "description": "关联数据",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.UserInfo"
+                        }
+                    ]
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "view_count": {
+                    "type": "integer",
+                    "example": 100
+                }
+            }
+        },
+        "dto.CommentListResponse": {
+            "description": "评论列表的响应数据结构",
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "description": "评论列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.CommentResponse"
+                    }
+                },
+                "page": {
+                    "description": "当前页码",
+                    "type": "integer",
+                    "example": 1
+                },
+                "page_size": {
+                    "description": "每页数量",
+                    "type": "integer",
+                    "example": 10
+                },
+                "total": {
+                    "description": "总评论数",
+                    "type": "integer",
+                    "example": 50
+                }
+            }
+        },
+        "dto.CommentResponse": {
+            "description": "评论的响应数据结构",
+            "type": "object",
+            "properties": {
+                "article_id": {
+                    "description": "文章ID",
+                    "type": "integer",
+                    "example": 1
+                },
+                "content": {
+                    "description": "评论内容",
+                    "type": "string",
+                    "example": "评论内容"
+                },
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2025-01-01T00:00:00Z"
+                },
+                "id": {
+                    "description": "评论ID",
+                    "type": "integer",
+                    "example": 1
+                },
+                "is_deleted": {
+                    "description": "是否已删除",
+                    "type": "boolean",
+                    "example": false
+                },
+                "like_count": {
+                    "description": "点赞数",
+                    "type": "integer",
+                    "example": 5
+                },
+                "parent_id": {
+                    "description": "父评论ID",
+                    "type": "integer",
+                    "example": 1
+                },
+                "replies": {
+                    "description": "回复列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.CommentResponse"
+                    }
+                },
+                "user": {
+                    "description": "关联数据",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.UserInfo"
+                        }
+                    ]
+                },
+                "user_id": {
+                    "description": "用户ID",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.CreateArticleRequest": {
+            "type": "object",
+            "required": [
+                "content",
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "example": "这是文章内容..."
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "['https://example.com/image1.jpg']"
+                    ]
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "example": "我的第一篇文章"
+                }
+            }
+        },
+        "dto.CreateCommentRequest": {
+            "description": "创建评论的请求参数",
+            "type": "object",
+            "required": [
+                "article_id",
+                "content"
+            ],
+            "properties": {
+                "article_id": {
+                    "description": "文章ID",
+                    "type": "integer",
+                    "example": 1
+                },
+                "content": {
+                    "description": "评论内容",
+                    "type": "string",
+                    "maxLength": 1000,
+                    "example": "这是一条评论"
+                },
+                "parent_id": {
+                    "description": "父评论ID，用于回复",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.UpdateArticleRequest": {
+            "type": "object",
+            "required": [
+                "content",
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "example": "更新后的内容..."
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "['https://example.com/image2.jpg']"
+                    ]
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "example": "更新后的标题"
+                }
+            }
+        },
+        "dto.UserInfo": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string",
+                    "example": "https://example.com/avatar.jpg"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "username": {
+                    "type": "string",
+                    "example": "用户名"
+                },
+                "wallet_address": {
+                    "type": "string",
+                    "example": "0x1234..."
+                }
             }
         },
         "routes.HealthResponse": {

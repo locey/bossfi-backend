@@ -40,6 +40,219 @@ definitions:
         type: string
       user: {}
     type: object
+  controllers.TestTokenRequest:
+    properties:
+      wallet_address:
+        example: 0x1234567890123456789012345678901234567890
+        type: string
+    required:
+    - wallet_address
+    type: object
+  controllers.TestTokenResponse:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      user: {}
+    type: object
+  dto.ArticleListResponse:
+    properties:
+      articles:
+        items:
+          $ref: '#/definitions/dto.ArticleResponse'
+        type: array
+      page:
+        example: 1
+        type: integer
+      page_size:
+        example: 10
+        type: integer
+      total:
+        example: 100
+        type: integer
+    type: object
+  dto.ArticleResponse:
+    properties:
+      comment_count:
+        example: 5
+        type: integer
+      content:
+        example: 文章内容
+        type: string
+      created_at:
+        example: "2025-01-01T00:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      images:
+        example:
+        - '[''https://example.com/image.jpg'']'
+        items:
+          type: string
+        type: array
+      is_deleted:
+        example: false
+        type: boolean
+      like_count:
+        example: 10
+        type: integer
+      title:
+        example: 文章标题
+        type: string
+      updated_at:
+        example: "2025-01-01T00:00:00Z"
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/dto.UserInfo'
+        description: 关联数据
+      user_id:
+        example: 1
+        type: integer
+      view_count:
+        example: 100
+        type: integer
+    type: object
+  dto.CommentListResponse:
+    description: 评论列表的响应数据结构
+    properties:
+      comments:
+        description: 评论列表
+        items:
+          $ref: '#/definitions/dto.CommentResponse'
+        type: array
+      page:
+        description: 当前页码
+        example: 1
+        type: integer
+      page_size:
+        description: 每页数量
+        example: 10
+        type: integer
+      total:
+        description: 总评论数
+        example: 50
+        type: integer
+    type: object
+  dto.CommentResponse:
+    description: 评论的响应数据结构
+    properties:
+      article_id:
+        description: 文章ID
+        example: 1
+        type: integer
+      content:
+        description: 评论内容
+        example: 评论内容
+        type: string
+      created_at:
+        description: 创建时间
+        example: "2025-01-01T00:00:00Z"
+        type: string
+      id:
+        description: 评论ID
+        example: 1
+        type: integer
+      is_deleted:
+        description: 是否已删除
+        example: false
+        type: boolean
+      like_count:
+        description: 点赞数
+        example: 5
+        type: integer
+      parent_id:
+        description: 父评论ID
+        example: 1
+        type: integer
+      replies:
+        description: 回复列表
+        items:
+          $ref: '#/definitions/dto.CommentResponse'
+        type: array
+      user:
+        allOf:
+        - $ref: '#/definitions/dto.UserInfo'
+        description: 关联数据
+      user_id:
+        description: 用户ID
+        example: 1
+        type: integer
+    type: object
+  dto.CreateArticleRequest:
+    properties:
+      content:
+        example: 这是文章内容...
+        type: string
+      images:
+        example:
+        - '[''https://example.com/image1.jpg'']'
+        items:
+          type: string
+        type: array
+      title:
+        example: 我的第一篇文章
+        maxLength: 200
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  dto.CreateCommentRequest:
+    description: 创建评论的请求参数
+    properties:
+      article_id:
+        description: 文章ID
+        example: 1
+        type: integer
+      content:
+        description: 评论内容
+        example: 这是一条评论
+        maxLength: 1000
+        type: string
+      parent_id:
+        description: 父评论ID，用于回复
+        example: 1
+        type: integer
+    required:
+    - article_id
+    - content
+    type: object
+  dto.UpdateArticleRequest:
+    properties:
+      content:
+        example: 更新后的内容...
+        type: string
+      images:
+        example:
+        - '[''https://example.com/image2.jpg'']'
+        items:
+          type: string
+        type: array
+      title:
+        example: 更新后的标题
+        maxLength: 200
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  dto.UserInfo:
+    properties:
+      avatar:
+        example: https://example.com/avatar.jpg
+        type: string
+      id:
+        example: 1
+        type: integer
+      username:
+        example: 用户名
+        type: string
+      wallet_address:
+        example: 0x1234...
+        type: string
+    type: object
   routes.HealthResponse:
     properties:
       message:
@@ -65,7 +278,6 @@ definitions:
         example: 1.0.0
         type: string
     type: object
-host: localhost:8080
 info:
   contact:
     email: support@bossfi.com
@@ -79,6 +291,300 @@ info:
   title: BossFi Backend API
   version: 1.0.0
 paths:
+  /articles:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取文章列表，支持排序和筛选
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 排序字段
+        enum:
+        - created_at
+        - like_count
+        - view_count
+        in: query
+        name: sort_by
+        type: string
+      - default: desc
+        description: 排序方向
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort_order
+        type: string
+      - description: 用户ID
+        in: query
+        name: user_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 文章列表
+          schema:
+            $ref: '#/definitions/dto.ArticleListResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取文章列表
+      tags:
+      - 文章
+    post:
+      consumes:
+      - application/json
+      description: 创建一篇新文章
+      parameters:
+      - description: 创建文章信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateArticleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/dto.ArticleResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未认证
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: 创建文章
+      tags:
+      - 文章
+  /articles/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除文章（逻辑删除）
+      parameters:
+      - description: 文章ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未认证
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 文章不存在
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: 删除文章
+      tags:
+      - 文章
+    get:
+      consumes:
+      - application/json
+      description: 根据文章ID获取文章详细信息
+      parameters:
+      - description: 文章ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 文章信息
+          schema:
+            $ref: '#/definitions/dto.ArticleResponse'
+        "404":
+          description: 文章不存在
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取文章详情
+      tags:
+      - 文章
+    put:
+      consumes:
+      - application/json
+      description: 更新文章内容
+      parameters:
+      - description: 文章ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新文章信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateArticleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/dto.ArticleResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未认证
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 文章不存在
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: 更新文章
+      tags:
+      - 文章
+  /articles/{id}/like:
+    post:
+      consumes:
+      - application/json
+      description: 给文章点赞
+      parameters:
+      - description: 文章ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 点赞成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 已经点赞
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未认证
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 文章不存在
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: 点赞文章
+      tags:
+      - 文章
+  /articles/{id}/unlike:
+    delete:
+      consumes:
+      - application/json
+      description: 取消文章点赞
+      parameters:
+      - description: 文章ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 取消点赞成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 未点赞
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未认证
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: 取消点赞文章
+      tags:
+      - 文章
   /auth/login:
     post:
       consumes:
@@ -209,6 +715,160 @@ paths:
       summary: 获取用户个人信息
       tags:
       - 认证
+  /auth/test-token:
+    post:
+      consumes:
+      - application/json
+      description: 直接获取JWT token用于API测试，仅限开发环境使用
+      parameters:
+      - description: 钱包地址信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.TestTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/controllers.TestTokenResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取测试用token
+      tags:
+      - 认证
+  /comments:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取文章评论列表，支持按父评论筛选
+      parameters:
+      - description: 文章ID
+        in: query
+        name: article_id
+        required: true
+        type: integer
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 父评论ID，用于获取回复
+        in: query
+        name: parent_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 评论列表
+          schema:
+            $ref: '#/definitions/dto.CommentListResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取评论列表
+      tags:
+      - 评论
+    post:
+      consumes:
+      - application/json
+      description: 为文章创建新评论，支持回复其他评论
+      parameters:
+      - description: 创建评论信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/dto.CommentResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未认证
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: 创建评论
+      tags:
+      - 评论
+  /comments/{id}/like:
+    post:
+      consumes:
+      - application/json
+      description: 为指定评论点赞或取消点赞
+      parameters:
+      - description: 评论ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未认证
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: 点赞评论
+      tags:
+      - 评论
   /health:
     get:
       consumes:

@@ -72,7 +72,7 @@ func (s *UserService) VerifyAndLogin(walletAddress, signature, message string) (
 	}
 
 	// 查找或创建用户
-	user, err := s.findOrCreateUser(walletAddress)
+	user, err := s.FindOrCreateUser(walletAddress)
 	if err != nil {
 		logrus.Errorf("Failed to find or create user: %v", err)
 		return nil, "", errors.New("failed to process user")
@@ -105,8 +105,8 @@ func (s *UserService) VerifyAndLogin(walletAddress, signature, message string) (
 	return user, token, nil
 }
 
-// findOrCreateUser 查找或创建用户
-func (s *UserService) findOrCreateUser(walletAddress string) (*models.User, error) {
+// FindOrCreateUser 查找或创建用户
+func (s *UserService) FindOrCreateUser(walletAddress string) (*models.User, error) {
 	var user models.User
 
 	err := database.DB.Where("wallet_address = ?", walletAddress).First(&user).Error

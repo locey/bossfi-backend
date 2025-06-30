@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"bossfi-backend/app/services"
 	"bossfi-backend/middleware"
+	"bossfi-backend/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,6 +42,17 @@ type LoginRequest struct {
 
 // LoginResponse 登录响应结构
 type LoginResponse struct {
+	Token string      `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	User  interface{} `json:"user"`
+}
+
+// TestTokenRequest 测试token请求结构
+type TestTokenRequest struct {
+	WalletAddress string `json:"wallet_address" binding:"required" example:"0x1234567890123456789012345678901234567890"`
+}
+
+// TestTokenResponse 测试token响应结构
+type TestTokenResponse struct {
 	Token string      `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 	User  interface{} `json:"user"`
 }
@@ -250,5 +263,83 @@ func (ac *AuthController) Logout(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Logged out successfully",
+	})
+}
+
+// GetTestToken 获取测试用token（仅用于开发测试）
+// @Summary 获取测试用token
+// @Description 直接获取JWT token用于API测试，仅限开发环境使用
+// @Tags 认证
+// @Accept json
+// @Produce json
+// @Param request body TestTokenRequest true "钱包地址信息"
+// @Success 200 {object} TestTokenResponse "获取成功"
+// @Failure 400 {object} map[string]interface{} "请求参数错误"
+// @Failure 500 {object} map[string]interface{} "服务器内部错误"
+// @Router /auth/test-token [post]
+func (ac *AuthController) GetTestToken(c *gin.Context) {
+	logger := middleware.GetLoggerFromContext(c)
+	var req TestTokenRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.WithError(err).Error("Invalid test token request parameters")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid request parameters: " + err.Error(),
+		})
+		return
+	}
+
+	logger.WithField("wallet_address", req.WalletAddress).Info("Getting test token for wallet")
+
+	// 验证钱包地址格式
+	if !utils.ValidateWalletAddress(req.WalletAddress) {
+		logger.WithField("wallet_address", req.WalletAddress).Error("Invalid wallet address format")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid wallet address format",
+		})
+		return
+	}
+
+	// 查找或创建用户
+	user, err := ac.userService.FindOrCreateUser(req.WalletAddress)
+	if err != nil {
+		logger.WithError(err).Error("Failed to find or create user")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to process user",
+		})
+		return
+	}
+
+	// 生成 JWT token
+	token, err := utils.GenerateJWT(strconv.FormatUint(uint64(user.ID), 10), user.WalletAddress)
+	if err != nil {
+		logger.WithError(err).Error("Failed to generate JWT")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to generate token",
+		})
+		return
+	}
+
+	// 隐藏敏感信息
+	userResponse := gin.H{
+		"id":             user.ID,
+		"wallet_address": user.WalletAddress,
+		"username":       user.Username,
+		"avatar":         user.Avatar,
+		"boss_balance":   user.BossBalance,
+		"staked_amount":  user.StakedAmount,
+		"reward_balance": user.RewardBalance,
+		"created_at":     user.CreatedAt,
+		"last_login_at":  user.LastLoginAt,
+	}
+
+	logger.WithFields(map[string]interface{}{
+		"user_id":        user.ID,
+		"wallet_address": req.WalletAddress,
+	}).Info("Test token generated successfully")
+
+	c.JSON(http.StatusOK, TestTokenResponse{
+		Token: token,
+		User:  userResponse,
 	})
 }
