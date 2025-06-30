@@ -38,11 +38,11 @@ func LoadRoutes(v1 *gin.RouterGroup) {
 
 		// 需要认证的端点
 		articles.Use(middleware.AuthMiddleware())
-		articles.POST("", articleController.CreateArticle)            // 创建文章
-		articles.PUT("/:id", articleController.UpdateArticle)         // 更新文章
-		articles.DELETE("/:id", articleController.DeleteArticle)      // 删除文章
-		articles.POST("/:id/like", articleController.LikeArticle)     // 点赞文章
-		articles.POST("/:id/unlike", articleController.UnlikeArticle) // 取消点赞文章
+		articles.POST("", articleController.CreateArticle)              // 创建文章
+		articles.PUT("/:id", articleController.UpdateArticle)           // 更新文章
+		articles.DELETE("/:id", articleController.DeleteArticle)        // 删除文章
+		articles.POST("/:id/like", articleController.LikeArticle)       // 点赞文章
+		articles.DELETE("/:id/unlike", articleController.UnlikeArticle) // 取消点赞文章
 	}
 
 	comments := v1.Group("/comments")
