@@ -83,13 +83,12 @@ func (s *ArticleService) UpdateArticle(id, userID uint, title, content string, i
 		return nil, err
 	}
 
-	updates := map[string]interface{}{
-		"title":   title,
-		"content": content,
-		"images":  images,
-	}
+	// 直接更新结构体字段，让GORM自动处理JSON序列化
+	article.Title = title
+	article.Content = content
+	article.Images = images
 
-	if err := database.DB.Model(&article).Updates(updates).Error; err != nil {
+	if err := database.DB.Save(&article).Error; err != nil {
 		return nil, err
 	}
 
