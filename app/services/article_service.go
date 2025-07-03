@@ -31,13 +31,23 @@ func (s *ArticleService) CreateArticle(userID uint, title, content string, image
 		logrus.Errorf("Failed to create article: %v", err)
 		return nil, err
 	}
-	return article, nil
+
+	// 重新获取创建的文章，包含关联数据
+	var createdArticle models.Article
+	err := database.DB.Preload("User").Preload("Category").
+		Where("id = ?", article.ID).First(&createdArticle).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &createdArticle, nil
 }
 
 // GetArticleByID 根据ID获取文章
 func (s *ArticleService) GetArticleByID(id uint) (*models.Article, error) {
 	var article models.Article
-	err := database.DB.Where("id = ? AND is_deleted = ?", id, false).First(&article).Error
+	err := database.DB.Preload("User").Preload("Category").
+		Where("id = ? AND is_deleted = ?", id, false).First(&article).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("article not found")
@@ -80,7 +90,8 @@ func (s *ArticleService) GetArticles(page, pageSize int, sortBy, sortOrder strin
 		orderClause = "created_at desc"
 	}
 	offset := (page - 1) * pageSize
-	err := query.Order(orderClause).Offset(offset).Limit(pageSize).Find(&articles).Error
+	err := query.Preload("User").Preload("Category").
+		Order(orderClause).Offset(offset).Limit(pageSize).Find(&articles).Error
 	if err != nil {
 		return nil, 0, err
 	}
@@ -109,7 +120,15 @@ func (s *ArticleService) UpdateArticle(id, userID uint, title, content string, i
 		return nil, err
 	}
 
-	return &article, nil
+	// 重新获取更新后的文章，包含关联数据
+	var updatedArticle models.Article
+	err = database.DB.Preload("User").Preload("Category").
+		Where("id = ?", id).First(&updatedArticle).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &updatedArticle, nil
 }
 
 // DeleteArticle 删除文章（逻辑删除）
