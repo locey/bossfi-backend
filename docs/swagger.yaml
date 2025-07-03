@@ -55,6 +55,50 @@ definitions:
         type: string
       user: {}
     type: object
+  dto.ArticleInfo:
+    description: 文章的基本信息
+    properties:
+      category:
+        allOf:
+        - $ref: '#/definitions/dto.CategoryInfo'
+        description: 分类信息
+      category_id:
+        description: 分类ID
+        example: 1
+        type: integer
+      comment_count:
+        description: 评论数
+        example: 5
+        type: integer
+      content:
+        description: 文章内容（截取前100字符）
+        example: 文章内容
+        type: string
+      created_at:
+        description: 创建时间
+        example: "2025-01-01T00:00:00Z"
+        type: string
+      id:
+        description: 文章ID
+        example: 1
+        type: integer
+      like_count:
+        description: 点赞数
+        example: 10
+        type: integer
+      title:
+        description: 文章标题
+        example: 文章标题
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/dto.UserInfo'
+        description: 关联数据
+      view_count:
+        description: 浏览数
+        example: 100
+        type: integer
+    type: object
   dto.ArticleListResponse:
     properties:
       articles:
@@ -73,6 +117,11 @@ definitions:
     type: object
   dto.ArticleResponse:
     properties:
+      category:
+        $ref: '#/definitions/dto.CategoryInfo'
+      category_id:
+        example: 1
+        type: integer
       comment_count:
         example: 5
         type: integer
@@ -87,7 +136,8 @@ definitions:
         type: integer
       images:
         example:
-        - '[''https://example.com/image.jpg'']'
+        - https://example.com/image.jpg
+        - https://example.com/image2.jpg
         items:
           type: string
         type: array
@@ -113,6 +163,91 @@ definitions:
       view_count:
         example: 100
         type: integer
+    type: object
+  dto.CategoryInfo:
+    properties:
+      color:
+        example: '#FF5733'
+        type: string
+      description:
+        example: 技术相关文章
+        type: string
+      icon:
+        example: tech-icon
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: 技术
+        type: string
+    type: object
+  dto.CategoryListResponse:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/dto.CategoryResponse'
+        type: array
+      total:
+        example: 10
+        type: integer
+    type: object
+  dto.CategoryResponse:
+    properties:
+      article_count:
+        example: 10
+        type: integer
+      color:
+        example: '#FF5733'
+        type: string
+      created_at:
+        example: "2025-01-01T00:00:00Z"
+        type: string
+      description:
+        example: 技术相关文章
+        type: string
+      icon:
+        example: tech-icon
+        type: string
+      id:
+        example: 1
+        type: integer
+      is_active:
+        example: true
+        type: boolean
+      name:
+        example: 技术
+        type: string
+      sort_order:
+        example: 1
+        type: integer
+      updated_at:
+        example: "2025-01-01T00:00:00Z"
+        type: string
+    type: object
+  dto.CommentInfo:
+    description: 父评论的基本信息
+    properties:
+      content:
+        description: 评论内容（截取前50字符）
+        example: 父评论内容
+        type: string
+      created_at:
+        description: 创建时间
+        example: "2025-01-01T00:00:00Z"
+        type: string
+      id:
+        description: 评论ID
+        example: 1
+        type: integer
+      like_count:
+        description: 点赞数
+        example: 3
+        type: integer
+      user:
+        allOf:
+        - $ref: '#/definitions/dto.UserInfo'
+        description: 关联数据
     type: object
   dto.CommentListResponse:
     description: 评论列表的响应数据结构
@@ -182,12 +317,17 @@ definitions:
     type: object
   dto.CreateArticleRequest:
     properties:
+      category_id:
+        description: 分类ID，可选
+        example: 1
+        type: integer
       content:
         example: 这是文章内容...
         type: string
       images:
         example:
-        - '[''https://example.com/image1.jpg'']'
+        - https://example.com/image1.jpg
+        - https://example.com/image2.jpg
         items:
           type: string
         type: array
@@ -198,6 +338,30 @@ definitions:
     required:
     - content
     - title
+    type: object
+  dto.CreateCategoryRequest:
+    properties:
+      color:
+        example: '#FF5733'
+        maxLength: 7
+        type: string
+      description:
+        example: 技术相关文章
+        maxLength: 200
+        type: string
+      icon:
+        example: tech-icon
+        maxLength: 100
+        type: string
+      name:
+        example: 技术
+        maxLength: 50
+        type: string
+      sort_order:
+        example: 1
+        type: integer
+    required:
+    - name
     type: object
   dto.CreateCommentRequest:
     description: 创建评论的请求参数
@@ -221,12 +385,17 @@ definitions:
     type: object
   dto.UpdateArticleRequest:
     properties:
+      category_id:
+        description: 分类ID，可选
+        example: 1
+        type: integer
       content:
         example: 更新后的内容...
         type: string
       images:
         example:
-        - '[''https://example.com/image2.jpg'']'
+        - https://example.com/image2.jpg
+        - https://example.com/image3.jpg
         items:
           type: string
         type: array
@@ -237,6 +406,102 @@ definitions:
     required:
     - content
     - title
+    type: object
+  dto.UpdateCategoryRequest:
+    properties:
+      color:
+        example: '#FF5733'
+        maxLength: 7
+        type: string
+      description:
+        example: 技术相关文章
+        maxLength: 200
+        type: string
+      icon:
+        example: tech-icon
+        maxLength: 100
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      name:
+        example: 技术
+        maxLength: 50
+        type: string
+      sort_order:
+        example: 1
+        type: integer
+    required:
+    - name
+    type: object
+  dto.UserCommentListResponse:
+    description: 用户评论列表的响应数据结构
+    properties:
+      comments:
+        description: 用户评论列表
+        items:
+          $ref: '#/definitions/dto.UserCommentResponse'
+        type: array
+      page:
+        description: 当前页码
+        example: 1
+        type: integer
+      page_size:
+        description: 每页数量
+        example: 10
+        type: integer
+      total:
+        description: 总评论数
+        example: 50
+        type: integer
+    type: object
+  dto.UserCommentResponse:
+    description: 用户评论的响应数据结构，包含完整的文章和父评论信息
+    properties:
+      article:
+        allOf:
+        - $ref: '#/definitions/dto.ArticleInfo'
+        description: 文章信息
+      article_id:
+        description: 文章ID
+        example: 1
+        type: integer
+      content:
+        description: 评论内容
+        example: 评论内容
+        type: string
+      created_at:
+        description: 创建时间
+        example: "2025-01-01T00:00:00Z"
+        type: string
+      id:
+        description: 评论ID
+        example: 1
+        type: integer
+      is_deleted:
+        description: 是否已删除
+        example: false
+        type: boolean
+      like_count:
+        description: 点赞数
+        example: 5
+        type: integer
+      parent:
+        allOf:
+        - $ref: '#/definitions/dto.CommentInfo'
+        description: 父评论信息（如果存在）
+      parent_id:
+        description: 父评论ID
+        example: 1
+        type: integer
+      user:
+        allOf:
+        - $ref: '#/definitions/dto.UserInfo'
+        description: 关联数据
+      user_id:
+        description: 用户ID
+        example: 1
+        type: integer
     type: object
   dto.UserInfo:
     properties:
@@ -295,7 +560,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 分页获取文章列表，支持排序和筛选
+      description: 分页获取文章列表，支持排序、分类筛选和关键字搜索
       parameters:
       - default: 1
         description: 页码
@@ -327,6 +592,14 @@ paths:
         in: query
         name: user_id
         type: integer
+      - description: 分类ID
+        in: query
+        name: category_id
+        type: integer
+      - description: 关键字搜索
+        in: query
+        name: keyword
+        type: string
       produces:
       - application/json
       responses:
@@ -747,6 +1020,226 @@ paths:
       summary: 获取测试用token
       tags:
       - 认证
+  /categories:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取分类列表
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 是否只查询活跃分类
+        in: query
+        name: is_active
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 分类列表
+          schema:
+            $ref: '#/definitions/dto.CategoryListResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取分类列表
+      tags:
+      - 分类
+    post:
+      consumes:
+      - application/json
+      description: 创建新的文章分类
+      parameters:
+      - description: 创建分类信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/dto.CategoryResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未认证
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: 创建分类
+      tags:
+      - 分类
+  /categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除分类（只能删除没有文章的分类）
+      parameters:
+      - description: 分类ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未认证
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 分类不存在
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: 删除分类
+      tags:
+      - 分类
+    get:
+      consumes:
+      - application/json
+      description: 根据分类ID获取分类详细信息
+      parameters:
+      - description: 分类ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 分类信息
+          schema:
+            $ref: '#/definitions/dto.CategoryResponse'
+        "404":
+          description: 分类不存在
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取分类详情
+      tags:
+      - 分类
+    put:
+      consumes:
+      - application/json
+      description: 更新分类信息
+      parameters:
+      - description: 分类ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新分类信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/dto.CategoryResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未认证
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 分类不存在
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: 更新分类
+      tags:
+      - 分类
+  /categories/active:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有活跃的分类列表（用于前端下拉选择）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 活跃分类列表
+          schema:
+            $ref: '#/definitions/dto.CategoryListResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取所有活跃分类
+      tags:
+      - 分类
   /comments:
     get:
       consumes:
@@ -884,6 +1377,49 @@ paths:
       summary: 健康检查
       tags:
       - 系统
+  /user/comments:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取当前登录用户的所有评论，包含文章信息和父评论信息
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 用户评论列表
+          schema:
+            $ref: '#/definitions/dto.UserCommentListResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未认证
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: 获取登录用户的所有评论
+      tags:
+      - 评论
 schemes:
 - http
 - https

@@ -44,6 +44,7 @@ func InitDB() error {
 func autoMigrate() error {
 	return DB.AutoMigrate(
 		&models.User{},
+		&models.ArticleCategory{},
 		&models.Article{},
 		&models.ArticleLike{},
 		&models.ArticleComment{},

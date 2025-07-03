@@ -51,11 +51,43 @@ COMMENT ON COLUMN users.updated_at IS '更新时间 - 用户信息最后更新�
 COMMENT ON COLUMN users.last_login_at IS '最后登录时间 - 用户最近一次登录的时间';
 
 -- =============================================================================
--- 2. 文章表 (articles)
+-- 2. 文章分类表 (article_categories)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS article_categories (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    description VARCHAR(200),
+    icon VARCHAR(100),
+    color VARCHAR(7), -- 十六进制颜色值，如 #FF5733
+    sort_order INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 创建索引
+CREATE INDEX IF NOT EXISTS idx_article_categories_sort_order ON article_categories(sort_order);
+CREATE INDEX IF NOT EXISTS idx_article_categories_is_active ON article_categories(is_active);
+
+-- article_categories表注释
+COMMENT ON TABLE article_categories IS '文章分类表 - 存储文章分类信息';
+COMMENT ON COLUMN article_categories.id IS '分类ID - 系统自动生成的唯一标识符';
+COMMENT ON COLUMN article_categories.name IS '分类名称 - 分类的显示名称，唯一';
+COMMENT ON COLUMN article_categories.description IS '分类描述 - 分类的详细描述';
+COMMENT ON COLUMN article_categories.icon IS '分类图标 - 分类的图标标识';
+COMMENT ON COLUMN article_categories.color IS '分类颜色 - 分类的显示颜色，十六进制格式';
+COMMENT ON COLUMN article_categories.sort_order IS '排序顺序 - 分类的显示排序，数字越小越靠前';
+COMMENT ON COLUMN article_categories.is_active IS '是否活跃 - 标记分类是否可用';
+COMMENT ON COLUMN article_categories.created_at IS '创建时间 - 分类创建时间';
+COMMENT ON COLUMN article_categories.updated_at IS '更新时间 - 分类最后更新时间';
+
+-- =============================================================================
+-- 3. 文章表 (articles)
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS articles (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id BIGINT NOT NULL,
+    category_id BIGINT, -- 分类ID，可为空
     title VARCHAR(200) NOT NULL,
     content TEXT NOT NULL,
     images JSONB,
@@ -65,7 +97,8 @@ CREATE TABLE IF NOT EXISTS articles (
     is_deleted BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_articles_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_articles_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_articles_category_id FOREIGN KEY (category_id) REFERENCES article_categories(id) ON DELETE SET NULL
 );
 
 -- 创建索引

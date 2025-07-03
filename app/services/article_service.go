@@ -18,12 +18,13 @@ func NewArticleService() *ArticleService {
 }
 
 // CreateArticle 创建文章
-func (s *ArticleService) CreateArticle(userID uint, title, content string, images []string) (*models.Article, error) {
+func (s *ArticleService) CreateArticle(userID uint, title, content string, images []string, categoryID *uint) (*models.Article, error) {
 	article := &models.Article{
-		UserID:  userID,
-		Title:   title,
-		Content: content,
-		Images:  images,
+		UserID:     userID,
+		Title:      title,
+		Content:    content,
+		Images:     images,
+		CategoryID: categoryID,
 	}
 
 	if err := database.DB.Create(article).Error; err != nil {
@@ -49,16 +50,31 @@ func (s *ArticleService) GetArticleByID(id uint) (*models.Article, error) {
 }
 
 // GetArticles 获取文章列表
-func (s *ArticleService) GetArticles(page, pageSize int, sortBy, sortOrder string, userID *uint) ([]models.Article, int64, error) {
+func (s *ArticleService) GetArticles(page, pageSize int, sortBy, sortOrder string, userID *uint, categoryID *uint, keyword string) ([]models.Article, int64, error) {
 	var articles []models.Article
 	var total int64
 	query := database.DB.Model(&models.Article{}).Where("is_deleted = ? ", false)
+
+	// 用户筛选
 	if userID != nil {
 		query = query.Where("user_id = ?", *userID)
 	}
+
+	// 分类筛选
+	if categoryID != nil {
+		query = query.Where("category_id = ?", *categoryID)
+	}
+
+	// 关键字搜索
+	if keyword != "" {
+		searchQuery := fmt.Sprintf("%%%s%%", keyword)
+		query = query.Where("title ILIKE ? OR content ILIKE ?", searchQuery, searchQuery)
+	}
+
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
+
 	orderClause := fmt.Sprintf("%s %s", sortBy, sortOrder)
 	if sortBy == "" {
 		orderClause = "created_at desc"
@@ -72,7 +88,7 @@ func (s *ArticleService) GetArticles(page, pageSize int, sortBy, sortOrder strin
 }
 
 // UpdateArticle 更新文章
-func (s *ArticleService) UpdateArticle(id, userID uint, title, content string, images []string) (*models.Article, error) {
+func (s *ArticleService) UpdateArticle(id, userID uint, title, content string, images []string, categoryID *uint) (*models.Article, error) {
 	var article models.Article
 
 	err := database.DB.Where("id = ? AND user_id = ? AND is_deleted = ?", id, userID, false).First(&article).Error
@@ -87,6 +103,7 @@ func (s *ArticleService) UpdateArticle(id, userID uint, title, content string, i
 	article.Title = title
 	article.Content = content
 	article.Images = images
+	article.CategoryID = categoryID
 
 	if err := database.DB.Save(&article).Error; err != nil {
 		return nil, err

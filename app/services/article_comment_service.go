@@ -191,3 +191,36 @@ func (s *ArticleCommentService) IsCommentLiked(commentID, userID uint) (bool, er
 
 	return count > 0, err
 }
+
+// GetUserComments 获取用户的所有评论
+func (s *ArticleCommentService) GetUserComments(userID uint, page, pageSize int) ([]models.ArticleComment, int64, error) {
+	var comments []models.ArticleComment
+	var total int64
+
+	query := database.DB.Model(&models.ArticleComment{}).
+		Where("user_id = ? AND is_deleted = ?", userID, false)
+
+	// 获取总数
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 分页查询，预加载文章信息、父评论信息和用户信息
+	offset := (page - 1) * pageSize
+	err := query.Preload("Article").
+		Preload("Article.User").
+		Preload("Article.Category").
+		Preload("Parent").
+		Preload("Parent.User").
+		Preload("User").
+		Order("created_at desc").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&comments).Error
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return comments, total, nil
+}

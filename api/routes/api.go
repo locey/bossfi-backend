@@ -11,6 +11,7 @@ func LoadRoutes(v1 *gin.RouterGroup) {
 	authController := controllers.NewAuthController()
 	articleController := controllers.NewArticleController()
 	articleCommentController := controllers.NewArticleCommentController()
+	categoryController := controllers.NewCategoryController()
 	// =============================================================================
 	// 认证相关路由
 	// =============================================================================
@@ -51,7 +52,32 @@ func LoadRoutes(v1 *gin.RouterGroup) {
 		comments.Use(middleware.AuthMiddleware())
 		comments.POST("", articleCommentController.CreateComment)        // 创建评论
 		comments.POST("/:id/like", articleCommentController.LikeComment) // 点赞评论
+	}
 
+	// =============================================================================
+	// 用户相关路由
+	// =============================================================================
+	user := v1.Group("/user")
+	{
+		user.Use(middleware.AuthMiddleware())
+		user.GET("/comments", articleCommentController.GetUserComments) // 获取用户评论列表
+	}
+
+	// =============================================================================
+	// 分类相关路由
+	// =============================================================================
+	categories := v1.Group("/categories")
+	{
+		// 公开端点 - 不需要认证
+		categories.GET("", categoryController.GetCategories)                 // 获取分类列表
+		categories.GET("/active", categoryController.GetAllActiveCategories) // 获取活跃分类
+		categories.GET("/:id", categoryController.GetCategory)               // 获取分类详情
+
+		// 需要认证的端点
+		categories.Use(middleware.AuthMiddleware())
+		categories.POST("", categoryController.CreateCategory)       // 创建分类
+		categories.PUT("/:id", categoryController.UpdateCategory)    // 更新分类
+		categories.DELETE("/:id", categoryController.DeleteCategory) // 删除分类
 	}
 
 }

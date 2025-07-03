@@ -49,7 +49,7 @@ func (ac *ArticleController) CreateArticle(c *gin.Context) {
 	}
 
 	userIDUint, _ := strconv.ParseUint(userID, 10, 32)
-	article, err := ac.articleService.CreateArticle(uint(userIDUint), req.Title, req.Content, req.Images)
+	article, err := ac.articleService.CreateArticle(uint(userIDUint), req.Title, req.Content, req.Images, req.CategoryID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -95,7 +95,7 @@ func (ac *ArticleController) GetArticle(c *gin.Context) {
 
 // GetArticles 获取文章列表
 // @Summary 获取文章列表
-// @Description 分页获取文章列表，支持排序和筛选
+// @Description 分页获取文章列表，支持排序、分类筛选和关键字搜索
 // @Tags 文章
 // @Accept json
 // @Produce json
@@ -104,6 +104,8 @@ func (ac *ArticleController) GetArticle(c *gin.Context) {
 // @Param sort_by query string false "排序字段" Enums(created_at, like_count, view_count)
 // @Param sort_order query string false "排序方向" Enums(asc, desc) default(desc)
 // @Param user_id query int false "用户ID"
+// @Param category_id query int false "分类ID"
+// @Param keyword query string false "关键字搜索"
 // @Success 200 {object} dto.ArticleListResponse "文章列表"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
@@ -129,7 +131,7 @@ func (ac *ArticleController) GetArticles(c *gin.Context) {
 		req.SortOrder = "desc"
 	}
 
-	articles, total, err := ac.articleService.GetArticles(req.Page, req.PageSize, req.SortBy, req.SortOrder, req.UserID)
+	articles, total, err := ac.articleService.GetArticles(req.Page, req.PageSize, req.SortBy, req.SortOrder, req.UserID, req.CategoryID, req.Keyword)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -187,7 +189,7 @@ func (ac *ArticleController) UpdateArticle(c *gin.Context) {
 	}
 
 	userIDUint, _ := strconv.ParseUint(userID, 10, 32)
-	article, err := ac.articleService.UpdateArticle(uint(id), uint(userIDUint), req.Title, req.Content, req.Images)
+	article, err := ac.articleService.UpdateArticle(uint(id), uint(userIDUint), req.Title, req.Content, req.Images, req.CategoryID)
 	if err != nil {
 		if err.Error() == "article not found or not authorized" {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -332,6 +334,7 @@ func (ac *ArticleController) convertToArticleResponse(article *models.Article) *
 	response := &dto.ArticleResponse{
 		ID:           article.ID,
 		UserID:       article.UserID,
+		CategoryID:   article.CategoryID,
 		Title:        article.Title,
 		Content:      article.Content,
 		Images:       article.Images,
@@ -350,6 +353,17 @@ func (ac *ArticleController) convertToArticleResponse(article *models.Article) *
 			Username:      article.User.Username,
 			Avatar:        article.User.Avatar,
 			WalletAddress: article.User.WalletAddress,
+		}
+	}
+
+	// 添加分类信息
+	if article.Category != nil && article.Category.ID != 0 {
+		response.Category = &dto.CategoryInfo{
+			ID:          article.Category.ID,
+			Name:        article.Category.Name,
+			Description: article.Category.Description,
+			Icon:        article.Category.Icon,
+			Color:       article.Category.Color,
 		}
 	}
 

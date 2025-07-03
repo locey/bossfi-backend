@@ -26,7 +26,7 @@ const docTemplate = `{
     "paths": {
         "/articles": {
             "get": {
-                "description": "分页获取文章列表，支持排序和筛选",
+                "description": "分页获取文章列表，支持排序、分类筛选和关键字搜索",
                 "consumes": [
                     "application/json"
                 ],
@@ -78,6 +78,18 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "用户ID",
                         "name": "user_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分类ID",
+                        "name": "category_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "关键字搜索",
+                        "name": "keyword",
                         "in": "query"
                     }
                 ],
@@ -707,6 +719,335 @@ const docTemplate = `{
                 }
             }
         },
+        "/categories": {
+            "get": {
+                "description": "分页获取分类列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "分类"
+                ],
+                "summary": "获取分类列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否只查询活跃分类",
+                        "name": "is_active",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "分类列表",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CategoryListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "创建新的文章分类",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "分类"
+                ],
+                "summary": "创建分类",
+                "parameters": [
+                    {
+                        "description": "创建分类信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateCategoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CategoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/active": {
+            "get": {
+                "description": "获取所有活跃的分类列表（用于前端下拉选择）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "分类"
+                ],
+                "summary": "获取所有活跃分类",
+                "responses": {
+                    "200": {
+                        "description": "活跃分类列表",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CategoryListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/{id}": {
+            "get": {
+                "description": "根据分类ID获取分类详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "分类"
+                ],
+                "summary": "获取分类详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "分类ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "分类信息",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CategoryResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "分类不存在",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "更新分类信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "分类"
+                ],
+                "summary": "更新分类",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "分类ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新分类信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateCategoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CategoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "分类不存在",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "删除分类（只能删除没有文章的分类）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "分类"
+                ],
+                "summary": "删除分类",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "分类ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "分类不存在",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/comments": {
             "get": {
                 "description": "分页获取文章评论列表，支持按父评论筛选",
@@ -912,6 +1253,71 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/comments": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "分页获取当前登录用户的所有评论，包含文章信息和父评论信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论"
+                ],
+                "summary": "获取登录用户的所有评论",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "用户评论列表",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserCommentListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -994,6 +1400,68 @@ const docTemplate = `{
                 "user": {}
             }
         },
+        "dto.ArticleInfo": {
+            "description": "文章的基本信息",
+            "type": "object",
+            "properties": {
+                "category": {
+                    "description": "分类信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.CategoryInfo"
+                        }
+                    ]
+                },
+                "category_id": {
+                    "description": "分类ID",
+                    "type": "integer",
+                    "example": 1
+                },
+                "comment_count": {
+                    "description": "评论数",
+                    "type": "integer",
+                    "example": 5
+                },
+                "content": {
+                    "description": "文章内容（截取前100字符）",
+                    "type": "string",
+                    "example": "文章内容"
+                },
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2025-01-01T00:00:00Z"
+                },
+                "id": {
+                    "description": "文章ID",
+                    "type": "integer",
+                    "example": 1
+                },
+                "like_count": {
+                    "description": "点赞数",
+                    "type": "integer",
+                    "example": 10
+                },
+                "title": {
+                    "description": "文章标题",
+                    "type": "string",
+                    "example": "文章标题"
+                },
+                "user": {
+                    "description": "关联数据",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.UserInfo"
+                        }
+                    ]
+                },
+                "view_count": {
+                    "description": "浏览数",
+                    "type": "integer",
+                    "example": 100
+                }
+            }
+        },
         "dto.ArticleListResponse": {
             "type": "object",
             "properties": {
@@ -1020,6 +1488,13 @@ const docTemplate = `{
         "dto.ArticleResponse": {
             "type": "object",
             "properties": {
+                "category": {
+                    "$ref": "#/definitions/dto.CategoryInfo"
+                },
+                "category_id": {
+                    "type": "integer",
+                    "example": 1
+                },
                 "comment_count": {
                     "type": "integer",
                     "example": 5
@@ -1042,7 +1517,8 @@ const docTemplate = `{
                         "type": "string"
                     },
                     "example": [
-                        "['https://example.com/image.jpg']"
+                        "https://example.com/image.jpg",
+                        "https://example.com/image2.jpg"
                     ]
                 },
                 "is_deleted": {
@@ -1076,6 +1552,125 @@ const docTemplate = `{
                 "view_count": {
                     "type": "integer",
                     "example": 100
+                }
+            }
+        },
+        "dto.CategoryInfo": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string",
+                    "example": "#FF5733"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "技术相关文章"
+                },
+                "icon": {
+                    "type": "string",
+                    "example": "tech-icon"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "技术"
+                }
+            }
+        },
+        "dto.CategoryListResponse": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.CategoryResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 10
+                }
+            }
+        },
+        "dto.CategoryResponse": {
+            "type": "object",
+            "properties": {
+                "article_count": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "color": {
+                    "type": "string",
+                    "example": "#FF5733"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2025-01-01T00:00:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "技术相关文章"
+                },
+                "icon": {
+                    "type": "string",
+                    "example": "tech-icon"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "技术"
+                },
+                "sort_order": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2025-01-01T00:00:00Z"
+                }
+            }
+        },
+        "dto.CommentInfo": {
+            "description": "父评论的基本信息",
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "评论内容（截取前50字符）",
+                    "type": "string",
+                    "example": "父评论内容"
+                },
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2025-01-01T00:00:00Z"
+                },
+                "id": {
+                    "description": "评论ID",
+                    "type": "integer",
+                    "example": 1
+                },
+                "like_count": {
+                    "description": "点赞数",
+                    "type": "integer",
+                    "example": 3
+                },
+                "user": {
+                    "description": "关联数据",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.UserInfo"
+                        }
+                    ]
                 }
             }
         },
@@ -1175,6 +1770,11 @@ const docTemplate = `{
                 "title"
             ],
             "properties": {
+                "category_id": {
+                    "description": "分类ID，可选",
+                    "type": "integer",
+                    "example": 1
+                },
                 "content": {
                     "type": "string",
                     "example": "这是文章内容..."
@@ -1185,13 +1785,46 @@ const docTemplate = `{
                         "type": "string"
                     },
                     "example": [
-                        "['https://example.com/image1.jpg']"
+                        "https://example.com/image1.jpg",
+                        "https://example.com/image2.jpg"
                     ]
                 },
                 "title": {
                     "type": "string",
                     "maxLength": 200,
                     "example": "我的第一篇文章"
+                }
+            }
+        },
+        "dto.CreateCategoryRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "color": {
+                    "type": "string",
+                    "maxLength": 7,
+                    "example": "#FF5733"
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "example": "技术相关文章"
+                },
+                "icon": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "tech-icon"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "example": "技术"
+                },
+                "sort_order": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -1228,6 +1861,11 @@ const docTemplate = `{
                 "title"
             ],
             "properties": {
+                "category_id": {
+                    "description": "分类ID，可选",
+                    "type": "integer",
+                    "example": 1
+                },
                 "content": {
                     "type": "string",
                     "example": "更新后的内容..."
@@ -1238,13 +1876,148 @@ const docTemplate = `{
                         "type": "string"
                     },
                     "example": [
-                        "['https://example.com/image2.jpg']"
+                        "https://example.com/image2.jpg",
+                        "https://example.com/image3.jpg"
                     ]
                 },
                 "title": {
                     "type": "string",
                     "maxLength": 200,
                     "example": "更新后的标题"
+                }
+            }
+        },
+        "dto.UpdateCategoryRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "color": {
+                    "type": "string",
+                    "maxLength": 7,
+                    "example": "#FF5733"
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "example": "技术相关文章"
+                },
+                "icon": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "tech-icon"
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "example": "技术"
+                },
+                "sort_order": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.UserCommentListResponse": {
+            "description": "用户评论列表的响应数据结构",
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "description": "用户评论列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.UserCommentResponse"
+                    }
+                },
+                "page": {
+                    "description": "当前页码",
+                    "type": "integer",
+                    "example": 1
+                },
+                "page_size": {
+                    "description": "每页数量",
+                    "type": "integer",
+                    "example": 10
+                },
+                "total": {
+                    "description": "总评论数",
+                    "type": "integer",
+                    "example": 50
+                }
+            }
+        },
+        "dto.UserCommentResponse": {
+            "description": "用户评论的响应数据结构，包含完整的文章和父评论信息",
+            "type": "object",
+            "properties": {
+                "article": {
+                    "description": "文章信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.ArticleInfo"
+                        }
+                    ]
+                },
+                "article_id": {
+                    "description": "文章ID",
+                    "type": "integer",
+                    "example": 1
+                },
+                "content": {
+                    "description": "评论内容",
+                    "type": "string",
+                    "example": "评论内容"
+                },
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2025-01-01T00:00:00Z"
+                },
+                "id": {
+                    "description": "评论ID",
+                    "type": "integer",
+                    "example": 1
+                },
+                "is_deleted": {
+                    "description": "是否已删除",
+                    "type": "boolean",
+                    "example": false
+                },
+                "like_count": {
+                    "description": "点赞数",
+                    "type": "integer",
+                    "example": 5
+                },
+                "parent": {
+                    "description": "父评论信息（如果存在）",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.CommentInfo"
+                        }
+                    ]
+                },
+                "parent_id": {
+                    "description": "父评论ID",
+                    "type": "integer",
+                    "example": 1
+                },
+                "user": {
+                    "description": "关联数据",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.UserInfo"
+                        }
+                    ]
+                },
+                "user_id": {
+                    "description": "用户ID",
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },

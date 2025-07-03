@@ -97,6 +97,21 @@ test-cover: ## 运行测试并生成覆盖率报告
 	$(GOCMD) tool cover -html=$(COVERAGE_DIR)/coverage.out -o $(COVERAGE_DIR)/coverage.html
 	@echo "覆盖率报告已生成: $(COVERAGE_DIR)/coverage.html"
 
+.PHONY: test-category
+test-category: ## 测试分类功能
+	@echo "测试分类功能..."
+	@./scripts/test_category.sh
+
+.PHONY: test-user-comments
+test-user-comments: ## 测试用户评论功能
+	@echo "测试用户评论功能..."
+	@go test -v ./test/user_comments_test.go ./test/common_test.go
+
+.PHONY: test-user-comments-e2e
+test-user-comments-e2e: ## 测试用户评论功能端到端
+	@echo "测试用户评论功能端到端..."
+	@./scripts/test_user_comments.sh
+
 .PHONY: test-watch
 test-watch: ## 监视文件变化并自动运行测试
 	@if command -v gotestsum >/dev/null 2>&1; then \
@@ -163,7 +178,8 @@ docker-logs: ## 查看 Docker 容器日志
 .PHONY: db-init
 db-init: ## 初始化数据库
 	createdb bossfi || true
-	psql -h localhost -U postgres -d bossfi -f 001_init_postgres.sql
+	psql -h localhost -U postgres -d bossfi -f deploy/init.sql
+	psql -h localhost -U postgres -d bossfi -f deploy/category_data.sql
 
 .PHONY: db-drop
 db-drop: ## 删除数据库
@@ -171,6 +187,11 @@ db-drop: ## 删除数据库
 
 .PHONY: db-reset
 db-reset: db-drop db-init ## 重置数据库
+
+.PHONY: db-migrate
+db-migrate: ## 运行数据库迁移
+	psql -h localhost -U postgres -d bossfi -f deploy/init.sql
+	psql -h localhost -U postgres -d bossfi -f deploy/category_data.sql
 
 # 部署相关
 .PHONY: deploy-dev
