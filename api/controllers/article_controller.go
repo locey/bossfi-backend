@@ -25,7 +25,7 @@ func NewArticleController() *ArticleController {
 // CreateArticle 创建文章
 // @Summary 创建文章
 // @Description 创建一篇新文章
-// @Tags 文章
+// @Tags articles
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -63,7 +63,7 @@ func (ac *ArticleController) CreateArticle(c *gin.Context) {
 // GetArticle 获取文章详情
 // @Summary 获取文章详情
 // @Description 根据文章ID获取文章详细信息
-// @Tags 文章
+// @Tags articles
 // @Accept json
 // @Produce json
 // @Param id path int true "文章ID"
@@ -96,7 +96,7 @@ func (ac *ArticleController) GetArticle(c *gin.Context) {
 // GetArticles 获取文章列表
 // @Summary 获取文章列表
 // @Description 分页获取文章列表，支持排序、分类筛选和关键字搜索
-// @Tags 文章
+// @Tags articles
 // @Accept json
 // @Produce json
 // @Param page query int false "页码" default(1)
@@ -156,7 +156,7 @@ func (ac *ArticleController) GetArticles(c *gin.Context) {
 // UpdateArticle 更新文章
 // @Summary 更新文章
 // @Description 更新文章内容
-// @Tags 文章
+// @Tags articles
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -206,7 +206,7 @@ func (ac *ArticleController) UpdateArticle(c *gin.Context) {
 // DeleteArticle 删除文章
 // @Summary 删除文章
 // @Description 删除文章（逻辑删除）
-// @Tags 文章
+// @Tags articles
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -247,7 +247,7 @@ func (ac *ArticleController) DeleteArticle(c *gin.Context) {
 // LikeArticle 点赞文章
 // @Summary 点赞文章
 // @Description 给文章点赞
-// @Tags 文章
+// @Tags articles
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -291,7 +291,7 @@ func (ac *ArticleController) LikeArticle(c *gin.Context) {
 // UnlikeArticle 取消点赞文章
 // @Summary 取消点赞文章
 // @Description 取消文章点赞
-// @Tags 文章
+// @Tags articles
 // @Accept json
 // @Produce json
 // @Security Bearer

@@ -25,7 +25,7 @@ func NewArticleCommentController() *ArticleCommentController {
 // CreateComment 创建评论
 // @Summary 创建评论
 // @Description 为文章创建新评论，支持回复其他评论
-// @Tags 评论
+// @Tags comments
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -62,7 +62,7 @@ func (cc *ArticleCommentController) CreateComment(c *gin.Context) {
 // GetComments 获取评论列表
 // @Summary 获取评论列表
 // @Description 分页获取文章评论列表，支持按父评论筛选
-// @Tags 评论
+// @Tags comments
 // @Accept json
 // @Produce json
 // @Param article_id query int true "文章ID"
@@ -70,6 +70,7 @@ func (cc *ArticleCommentController) CreateComment(c *gin.Context) {
 // @Param page_size query int false "每页数量" default(10)
 // @Param parent_id query int false "父评论ID，用于获取回复"
 // @Success 200 {object} dto.CommentListResponse "评论列表"
+// @x-example {"comments":[{"article_id":1,"content":"评论内容","created_at":"2025-01-01T00:00:00Z","id":1,"is_deleted":false,"like_count":5,"parent_id":1,"replies":[{"id":2,"user_id":1,"article_id":1,"parent_id":1,"content":"回复内容","like_count":0,"is_deleted":false,"created_at":"2025-01-01T00:00:00Z","user":{"avatar":"https://example.com/avatar.jpg","id":1,"username":"用户名","wallet_address":"0x1234..."},"replies":[]}],"user":{"avatar":"https://example.com/avatar.jpg","id":1,"username":"用户名","wallet_address":"0x1234..."},"user_id":1}],"page":1,"page_size":10,"total":50}
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /comments [get]
@@ -80,18 +81,55 @@ func (cc *ArticleCommentController) GetComments(c *gin.Context) {
 		return
 	}
 	// 获取评论列表
-	comments, _, err := cc.commentService.GetComments(req.ArticleID, req.Page, req.PageSize, req.ParentID)
+	comments, total, err := cc.commentService.GetComments(req.ArticleID, req.Page, req.PageSize, req.ParentID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, comments)
+
+	// 转换为响应格式
+	response := dto.CommentListResponse{
+		Comments: make([]dto.CommentResponse, len(comments)),
+		Total:    total,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	}
+	for i, comment := range comments {
+		response.Comments[i] = cc.convertToCommentResponse(&comment)
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// convertToCommentResponse 转换为精简的评论响应格式
+func (cc *ArticleCommentController) convertToCommentResponse(comment *models.ArticleComment) dto.CommentResponse {
+	resp := dto.CommentResponse{
+		ID:        comment.ID,
+		UserID:    comment.UserID,
+		ArticleID: comment.ArticleID,
+		ParentID:  comment.ParentID,
+		Content:   comment.Content,
+		LikeCount: comment.LikeCount,
+		IsDeleted: comment.IsDeleted,
+		CreatedAt: comment.CreatedAt,
+		User: dto.UserInfo{
+			ID:            comment.User.ID,
+			Username:      comment.User.Username,
+			Avatar:        comment.User.Avatar,
+			WalletAddress: comment.User.WalletAddress,
+		},
+		Replies: make([]dto.CommentResponse, len(comment.Replies)),
+	}
+	for i, reply := range comment.Replies {
+		resp.Replies[i] = cc.convertToCommentResponse(&reply)
+	}
+	return resp
 }
 
 // LikeComment 点赞评论
 // @Summary 点赞评论
 // @Description 为指定评论点赞或取消点赞
-// @Tags 评论
+// @Tags comments
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -129,7 +167,7 @@ func (cc *ArticleCommentController) LikeComment(c *gin.Context) {
 // GetUserComments 获取登录用户的所有评论
 // @Summary 获取登录用户的所有评论
 // @Description 分页获取当前登录用户的所有评论，包含文章信息和父评论信息
-// @Tags 评论
+// @Tags comments
 // @Accept json
 // @Produce json
 // @Security Bearer

@@ -31,7 +31,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "文章"
+                    "articles"
                 ],
                 "summary": "获取文章列表",
                 "parameters": [
@@ -127,7 +127,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "文章"
+                    "articles"
                 ],
                 "summary": "创建文章",
                 "parameters": [
@@ -182,7 +182,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "文章"
+                    "articles"
                 ],
                 "summary": "获取文章详情",
                 "parameters": [
@@ -231,7 +231,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "文章"
+                    "articles"
                 ],
                 "summary": "更新文章",
                 "parameters": [
@@ -303,7 +303,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "文章"
+                    "articles"
                 ],
                 "summary": "删除文章",
                 "parameters": [
@@ -362,7 +362,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "文章"
+                    "articles"
                 ],
                 "summary": "点赞文章",
                 "parameters": [
@@ -428,7 +428,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "文章"
+                    "articles"
                 ],
                 "summary": "取消点赞文章",
                 "parameters": [
@@ -482,7 +482,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "认证"
+                    "auth"
                 ],
                 "summary": "钱包签名登录",
                 "parameters": [
@@ -542,7 +542,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "认证"
+                    "auth"
                 ],
                 "summary": "用户登出",
                 "responses": {
@@ -580,7 +580,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "认证"
+                    "auth"
                 ],
                 "summary": "获取用于钱包签名的消息和 nonce",
                 "parameters": [
@@ -633,7 +633,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "认证"
+                    "auth"
                 ],
                 "summary": "获取用户个人信息",
                 "responses": {
@@ -678,7 +678,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "认证"
+                    "auth"
                 ],
                 "summary": "获取测试用token",
                 "parameters": [
@@ -726,7 +726,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "分类"
+                    "categories"
                 ],
                 "summary": "获取分类列表",
                 "parameters": [
@@ -788,7 +788,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "分类"
+                    "categories"
                 ],
                 "summary": "创建分类",
                 "parameters": [
@@ -843,7 +843,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "分类"
+                    "categories"
                 ],
                 "summary": "获取所有活跃分类",
                 "responses": {
@@ -873,7 +873,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "分类"
+                    "categories"
                 ],
                 "summary": "获取分类详情",
                 "parameters": [
@@ -922,7 +922,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "分类"
+                    "categories"
                 ],
                 "summary": "更新分类",
                 "parameters": [
@@ -994,7 +994,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "分类"
+                    "categories"
                 ],
                 "summary": "删除分类",
                 "parameters": [
@@ -1055,7 +1055,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "评论"
+                    "comments"
                 ],
                 "summary": "获取评论列表",
                 "parameters": [
@@ -1124,7 +1124,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "评论"
+                    "comments"
                 ],
                 "summary": "创建评论",
                 "parameters": [
@@ -1184,7 +1184,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "评论"
+                    "comments"
                 ],
                 "summary": "点赞评论",
                 "parameters": [
@@ -1266,7 +1266,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "评论"
+                    "comments"
                 ],
                 "summary": "获取登录用户的所有评论",
                 "parameters": [

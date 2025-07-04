@@ -60,7 +60,7 @@ type TestTokenResponse struct {
 // GetNonce 获取签名消息和 nonce
 // @Summary 获取用于钱包签名的消息和 nonce
 // @Description 前端调用此接口获取需要签名的消息和 nonce，用于钱包登录
-// @Tags 认证
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Param request body GetNonceRequest true "钱包地址信息"
@@ -105,7 +105,7 @@ func (ac *AuthController) GetNonce(c *gin.Context) {
 // Login 钱包签名登录
 // @Summary 钱包签名登录
 // @Description 使用钱包签名进行登录验证，验证成功后返回JWT令牌
-// @Tags 认证
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Param request body LoginRequest true "登录信息"
@@ -167,7 +167,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 // GetProfile 获取用户个人信息
 // @Summary 获取用户个人信息
 // @Description 获取当前登录用户的详细个人信息
-// @Tags 认证
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -227,7 +227,7 @@ func (ac *AuthController) GetProfile(c *gin.Context) {
 // Logout 用户登出
 // @Summary 用户登出
 // @Description 用户登出，清除服务器端会话信息
-// @Tags 认证
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -269,7 +269,7 @@ func (ac *AuthController) Logout(c *gin.Context) {
 // GetTestToken 获取测试用token（仅用于开发测试）
 // @Summary 获取测试用token
 // @Description 直接获取JWT token用于API测试，仅限开发环境使用
-// @Tags 认证
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Param request body TestTokenRequest true "钱包地址信息"

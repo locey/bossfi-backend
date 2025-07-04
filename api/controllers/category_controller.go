@@ -25,7 +25,7 @@ func NewCategoryController() *CategoryController {
 // CreateCategory 创建分类
 // @Summary 创建分类
 // @Description 创建新的文章分类
-// @Tags 分类
+// @Tags categories
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -62,7 +62,7 @@ func (cc *CategoryController) CreateCategory(c *gin.Context) {
 // GetCategory 获取分类详情
 // @Summary 获取分类详情
 // @Description 根据分类ID获取分类详细信息
-// @Tags 分类
+// @Tags categories
 // @Accept json
 // @Produce json
 // @Param id path int true "分类ID"
@@ -95,7 +95,7 @@ func (cc *CategoryController) GetCategory(c *gin.Context) {
 // GetCategories 获取分类列表
 // @Summary 获取分类列表
 // @Description 分页获取分类列表
-// @Tags 分类
+// @Tags categories
 // @Accept json
 // @Produce json
 // @Param page query int false "页码" default(1)
@@ -143,7 +143,7 @@ func (cc *CategoryController) GetCategories(c *gin.Context) {
 // UpdateCategory 更新分类
 // @Summary 更新分类
 // @Description 更新分类信息
-// @Tags 分类
+// @Tags categories
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -193,7 +193,7 @@ func (cc *CategoryController) UpdateCategory(c *gin.Context) {
 // DeleteCategory 删除分类
 // @Summary 删除分类
 // @Description 删除分类（只能删除没有文章的分类）
-// @Tags 分类
+// @Tags categories
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -237,7 +237,7 @@ func (cc *CategoryController) DeleteCategory(c *gin.Context) {
 // GetAllActiveCategories 获取所有活跃分类
 // @Summary 获取所有活跃分类
 // @Description 获取所有活跃的分类列表（用于前端下拉选择）
-// @Tags 分类
+// @Tags categories
 // @Accept json
 // @Produce json
 // @Success 200 {object} dto.CategoryListResponse "活跃分类列表"
