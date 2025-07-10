@@ -33,10 +33,10 @@ func InitDB() error {
 	logrus.Info("Database connected successfully")
 
 	// 自动迁移模型
-	if err := autoMigrate(); err != nil {
-		logrus.Errorf("Failed to migrate database: %v", err)
-		return err
-	}
+	//if err := autoMigrate(); err != nil {
+	//	logrus.Errorf("Failed to migrate database: %v", err)
+	//	return err
+	//}
 
 	return nil
 }

@@ -22,18 +22,21 @@ type UpdateArticleRequest struct {
 
 // ArticleResponse 文章响应
 type ArticleResponse struct {
-	ID           uint      `json:"id" example:"1"`
-	UserID       uint      `json:"user_id" example:"1"`
-	CategoryID   *uint     `json:"category_id" example:"1"`
-	Title        string    `json:"title" example:"文章标题"`
-	Content      string    `json:"content" example:"文章内容"`
-	Images       []string  `json:"images" example:"https://example.com/image.jpg,https://example.com/image2.jpg"`
-	LikeCount    int       `json:"like_count" example:"10"`
-	CommentCount int       `json:"comment_count" example:"5"`
-	ViewCount    int       `json:"view_count" example:"100"`
-	IsDeleted    bool      `json:"is_deleted" example:"false"`
-	CreatedAt    time.Time `json:"created_at" example:"2025-01-01T00:00:00Z"`
-	UpdatedAt    time.Time `json:"updated_at" example:"2025-01-01T00:00:00Z"`
+	ID           uint       `json:"id" example:"1"`
+	UserID       uint       `json:"user_id" example:"1"`
+	CategoryID   *uint      `json:"category_id" example:"1"`
+	Title        string     `json:"title" example:"文章标题"`
+	Content      string     `json:"content" example:"文章内容"`
+	Images       []string   `json:"images" example:"https://example.com/image.jpg,https://example.com/image2.jpg"`
+	LikeCount    int        `json:"like_count" example:"10"`
+	CommentCount int        `json:"comment_count" example:"5"`
+	ViewCount    int        `json:"view_count" example:"100"`
+	IsDeleted    bool       `json:"is_deleted" example:"false"`
+	CreatedAt    time.Time  `json:"created_at" example:"2025-01-01T00:00:00Z"`
+	UpdatedAt    time.Time  `json:"updated_at" example:"2025-01-01T00:00:00Z"`
+	Score        *float64   `json:"score" example:"8.5"`
+	ScoreTime    *time.Time `json:"score_time" example:"2025-01-01T00:00:00Z"`
+	ScoreReason  string     `json:"score_reason" example:"文章质量较高"`
 
 	// 关联数据
 	User     UserInfo      `json:"user"`

@@ -16,6 +16,7 @@ type Config struct {
 	Server     ServerConfig
 	Blockchain BlockchainConfig
 	Cron       CronConfig
+	AiHubMix   AiHubMixConfig
 }
 
 type DatabaseConfig struct {
@@ -53,6 +54,11 @@ type BlockchainConfig struct {
 type CronConfig struct {
 	Enabled                bool
 	BlockchainSyncInterval string
+}
+
+type AiHubMixConfig struct {
+	APIKey  string
+	BaseURL string
 }
 
 var AppConfig *Config
@@ -98,6 +104,10 @@ func Init() {
 		Cron: CronConfig{
 			Enabled:                cronEnabled,
 			BlockchainSyncInterval: getEnv("BLOCKCHAIN_SYNC_INTERVAL", "*/5 * * * *"),
+		},
+		AiHubMix: AiHubMixConfig{
+			APIKey:  getEnv("AIHUBMIX_API_KEY", ""),
+			BaseURL: getEnv("AIHUBMIX_BASE_URL", ""),
 		},
 	}
 }

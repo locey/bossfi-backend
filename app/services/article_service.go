@@ -40,6 +40,16 @@ func (s *ArticleService) CreateArticle(userID uint, title, content string, image
 		return nil, err
 	}
 
+	// 异步触发AI评分
+	go func() {
+		aiScoringService := NewAIScoringService()
+		if err := aiScoringService.ScoreArticle(article.ID); err != nil {
+			logrus.Errorf("Failed to auto-score article %d: %v", article.ID, err)
+		} else {
+			logrus.Infof("Successfully auto-scored article %d", article.ID)
+		}
+	}()
+
 	return &createdArticle, nil
 }
 

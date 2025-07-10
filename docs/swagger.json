@@ -1108,6 +1108,48 @@
                             "additionalProperties": true
                         }
                     }
+                },
+                "x-example": {
+                    "comments": [
+                        {
+                            "article_id": 1,
+                            "content": "评论内容",
+                            "created_at": "2025-01-01T00:00:00Z",
+                            "id": 1,
+                            "is_deleted": false,
+                            "like_count": 5,
+                            "parent_id": 1,
+                            "replies": [
+                                {
+                                    "article_id": 1,
+                                    "content": "回复内容",
+                                    "created_at": "2025-01-01T00:00:00Z",
+                                    "id": 2,
+                                    "is_deleted": false,
+                                    "like_count": 0,
+                                    "parent_id": 1,
+                                    "replies": [],
+                                    "user": {
+                                        "avatar": "https://example.com/avatar.jpg",
+                                        "id": 1,
+                                        "username": "用户名",
+                                        "wallet_address": "0x1234..."
+                                    },
+                                    "user_id": 1
+                                }
+                            ],
+                            "user": {
+                                "avatar": "https://example.com/avatar.jpg",
+                                "id": 1,
+                                "username": "用户名",
+                                "wallet_address": "0x1234..."
+                            },
+                            "user_id": 1
+                        }
+                    ],
+                    "page": 1,
+                    "page_size": 10,
+                    "total": 50
                 }
             },
             "post": {
