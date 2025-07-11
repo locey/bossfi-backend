@@ -344,6 +344,9 @@ func (ac *ArticleController) convertToArticleResponse(article *models.Article) *
 		IsDeleted:    article.IsDeleted,
 		CreatedAt:    article.CreatedAt,
 		UpdatedAt:    article.UpdatedAt,
+		Score:        article.Score,
+		ScoreTime:    article.ScoreTime,
+		ScoreReason:  article.ScoreReason,
 	}
 
 	// 添加用户信息

@@ -36,16 +36,6 @@ GET /api/v1/ai-scoring/unscored?limit=10
 POST /api/v1/ai-scoring/auto-score?limit=5
 ```
 
-##### 重试失败的评分
-```
-POST /api/v1/ai-scoring/retry-failed?limit=10
-```
-
-##### 重试待评分的文章
-```
-POST /api/v1/ai-scoring/retry-pending?limit=20
-```
-
 #### 需要认证的接口
 
 ##### 手动评分单篇文章
