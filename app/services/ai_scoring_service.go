@@ -261,3 +261,64 @@ func (s *AIScoringService) ResetScoreStatus(articleID uint) error {
 		Where("id = ? AND is_deleted = ?", articleID, false).
 		Update("score_status", ScoreStatusPending).Error
 }
+
+// RetryFailedScoring 重试失败的评分
+func (s *AIScoringService) RetryFailedScoring(limit int) (int, int, error) {
+	// 获取评分失败的文章
+	failedArticles, err := s.GetArticlesByScoreStatus(ScoreStatusFailed, limit)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to get failed articles: %v", err)
+	}
+
+	successCount := 0
+	failCount := 0
+
+	for _, article := range failedArticles {
+		// 重置状态为待评分
+		if err := s.ResetScoreStatus(article.ID); err != nil {
+			logrus.Errorf("Failed to reset score status for article %d: %v", article.ID, err)
+			failCount++
+			continue
+		}
+
+		// 重新评分
+		if err := s.ScoreArticle(article.ID); err != nil {
+			logrus.Errorf("Failed to retry scoring article %d: %v", article.ID, err)
+			failCount++
+		} else {
+			successCount++
+		}
+
+		// 添加延迟避免API限制
+		time.Sleep(2 * time.Second)
+	}
+
+	return successCount, failCount, nil
+}
+
+// RetryPendingScoring 重试待评分的文章
+func (s *AIScoringService) RetryPendingScoring(limit int) (int, int, error) {
+	// 获取待评分的文章
+	pendingArticles, err := s.GetArticlesByScoreStatus(ScoreStatusPending, limit)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to get pending articles: %v", err)
+	}
+
+	successCount := 0
+	failCount := 0
+
+	for _, article := range pendingArticles {
+		// 直接评分
+		if err := s.ScoreArticle(article.ID); err != nil {
+			logrus.Errorf("Failed to score pending article %d: %v", article.ID, err)
+			failCount++
+		} else {
+			successCount++
+		}
+
+		// 添加延迟避免API限制
+		time.Sleep(2 * time.Second)
+	}
+
+	return successCount, failCount, nil
+}

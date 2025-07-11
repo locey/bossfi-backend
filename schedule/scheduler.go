@@ -11,6 +11,7 @@ import (
 type Scheduler struct {
 	cron              *cron.Cron
 	blockchainService *services.BlockchainService
+	aiScoringService  *services.AIScoringService
 }
 
 func NewScheduler() *Scheduler {
@@ -22,6 +23,7 @@ func NewScheduler() *Scheduler {
 			),
 		),
 		blockchainService: services.NewBlockchainService(),
+		aiScoringService:  services.NewAIScoringService(),
 	}
 }
 
@@ -63,6 +65,19 @@ func (s *Scheduler) Start() error {
 	}
 	logrus.Info("Added Redis cleanup job (hourly)")
 
+	// 添加AI评分重试任务
+	if config.AppConfig.Cron.AIScoringRetryInterval != "" {
+		_, err := s.cron.AddFunc(config.AppConfig.Cron.AIScoringRetryInterval, func() {
+			logrus.Info("Running AI scoring retry job...")
+			s.retryAIScoring()
+		})
+		if err != nil {
+			logrus.Errorf("Failed to add AI scoring retry job: %v", err)
+			return err
+		}
+		logrus.Infof("Added AI scoring retry job with interval: %s", config.AppConfig.Cron.AIScoringRetryInterval)
+	}
+
 	// 启动定时任务
 	s.cron.Start()
 	logrus.Info("Cron scheduler started successfully")
@@ -88,6 +103,29 @@ func (s *Scheduler) cleanupExpiredData() {
 	// 这里可以实现清理逻辑
 	// 例如：删除过期的 nonce、清理过期的会话等
 	logrus.Debug("Cleanup job completed")
+}
+
+// retryAIScoring AI评分重试任务
+func (s *Scheduler) retryAIScoring() {
+	logrus.Info("Starting AI scoring retry job...")
+
+	// 重试失败的评分（最多10篇）,失败的看失败原因在做决定,是否初始化评分状态,防止重复重试
+	// failedSuccess, failedFail, err := s.aiScoringService.RetryFailedScoring(10)
+	// if err != nil {
+	// 	logrus.Errorf("Failed to retry failed scoring: %v", err)
+	// } else {
+	// 	logrus.Infof("Retry failed scoring completed: %d success, %d failed", failedSuccess, failedFail)
+	// }
+
+	// 重试待评分的文章（最多20篇）
+	pendingSuccess, pendingFail, err := s.aiScoringService.RetryPendingScoring(20)
+	if err != nil {
+		logrus.Errorf("Failed to retry pending scoring: %v", err)
+	} else {
+		logrus.Infof("Retry pending scoring completed: %d success, %d failed", pendingSuccess, pendingFail)
+	}
+
+	logrus.Infof("AI scoring retry job completed: total %d success, %d failed", pendingSuccess, pendingFail)
 }
 
 // AddCustomJob 添加自定义定时任务

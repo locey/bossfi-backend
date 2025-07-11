@@ -79,5 +79,4 @@ func LoadRoutes(v1 *gin.RouterGroup) {
 		categories.PUT("/:id", categoryController.UpdateCategory)    // 更新分类
 		categories.DELETE("/:id", categoryController.DeleteCategory) // 删除分类
 	}
-
 }

@@ -36,6 +36,16 @@ GET /api/v1/ai-scoring/unscored?limit=10
 POST /api/v1/ai-scoring/auto-score?limit=5
 ```
 
+##### 重试失败的评分
+```
+POST /api/v1/ai-scoring/retry-failed?limit=10
+```
+
+##### 重试待评分的文章
+```
+POST /api/v1/ai-scoring/retry-pending?limit=20
+```
+
 #### 需要认证的接口
 
 ##### 手动评分单篇文章
@@ -66,14 +76,18 @@ Authorization: Bearer {token}
 
 | 字段名 | 类型 | 说明 |
 |--------|------|------|
-| ai_score | DECIMAL(3,2) | AI评分 (0-10分) |
-| ai_score_time | TIMESTAMP | AI评分时间 |
-| ai_score_reason | TEXT | AI评分理由 |
+| score | DECIMAL(3,2) | AI评分 (0-10分) |
+| score_time | TIMESTAMP | AI评分时间 |
+| score_reason | TEXT | AI评分理由 |
+| score_status | INT | 评分状态: 0-待评分, 1-评分中, 2-评分成功, -1-评分失败 |
 
 ### 索引
-- `idx_articles_ai_score`: 评分索引
-- `idx_articles_ai_score_time`: 评分时间索引
-- `idx_articles_ai_score_null`: 未评分文章索引
+- `idx_articles_score`: 评分索引
+- `idx_articles_score_time`: 评分时间索引
+- `idx_articles_score_null`: 未评分文章索引
+- `idx_articles_score_status`: 评分状态索引
+- `idx_articles_score_status_pending`: 待评分文章索引
+- `idx_articles_score_status_failed`: 评分失败文章索引
 
 ## 配置
 
@@ -83,6 +97,9 @@ Authorization: Bearer {token}
 # AiHubMix API配置
 AIHUBMIX_API_KEY=sk-VniUXYO3lAMincy8FcCb95AdCbE648De8dA4B0D96bF10380
 AIHUBMIX_BASE_URL=https://api.aihubmix.com
+
+# 定时任务配置
+AI_SCORING_RETRY_INTERVAL=0 */2 * * *  # 每2小时执行一次重试
 ```
 
 ### 默认配置
@@ -101,6 +118,7 @@ AiHubMix: AiHubMixConfig{
 执行迁移脚本：
 ```sql
 -- 文件: deploy/ai_scoring_migration.sql
+-- 文件: deploy/ai_scoring_status_migration.sql
 ```
 
 ### 2. 环境配置
@@ -109,6 +127,7 @@ AiHubMix: AiHubMixConfig{
 ```bash
 AIHUBMIX_API_KEY=sk-VniUXYO3lAMincy8FcCb95AdCbE648De8dA4B0D96bF10380
 AIHUBMIX_BASE_URL=https://api.aihubmix.com
+AI_SCORING_RETRY_INTERVAL=0 */2 * * *  # 每2小时执行一次重试
 ```
 
 ### 3. 重启服务

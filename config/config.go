@@ -54,6 +54,7 @@ type BlockchainConfig struct {
 type CronConfig struct {
 	Enabled                bool
 	BlockchainSyncInterval string
+	AIScoringRetryInterval string
 }
 
 type AiHubMixConfig struct {
@@ -104,6 +105,7 @@ func Init() {
 		Cron: CronConfig{
 			Enabled:                cronEnabled,
 			BlockchainSyncInterval: getEnv("BLOCKCHAIN_SYNC_INTERVAL", "*/5 * * * *"),
+			AIScoringRetryInterval: getEnv("AI_SCORING_RETRY_INTERVAL", "0 */2 * * *"), // 每2小时执行一次
 		},
 		AiHubMix: AiHubMixConfig{
 			APIKey:  getEnv("AIHUBMIX_API_KEY", ""),
